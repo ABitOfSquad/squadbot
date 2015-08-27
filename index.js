@@ -216,6 +216,6 @@ global.api = {
     "send": sendMessage,
     "sendMessage": sendMessage, // Alias
     "sendImage": sendImage,
-    "getMembers": getMembers,
-    "getName": function(id) {return id.split("@")[0]} // TODO
+    "getMembers": getMembers//,
+    //"getName": function(id) {return id.split("@")[0]} // TODO
 };

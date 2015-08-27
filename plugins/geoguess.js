@@ -5,7 +5,7 @@ var plugin = {
 		"Lem Severein" : "Creator"
 	},
 	"collaborators" : {},
-	"version" : "0.1.0",
+	"version" : "0.1.1",
 	"protocol" : "1"
 };
 
@@ -80,7 +80,9 @@ bot.on("command", function(cmd, args) {
 				}
 			}
 			
-			api.send(api.getName(guesses[i].user) + " has won, he/she was only " + kmOff + "km off")
+			api.send(best.user + " has won, he/she was only " + best.kmOff + "km off")
+
+			playing = false
 		}, 60000);
 	}
 })
@@ -88,13 +90,13 @@ bot.on("command", function(cmd, args) {
 bot.on("location", function(loc) {
 	if (playing) {
 		for (var i = 0; i < guesses.length; i++) {
-			if (guesses[i].user == loc.author) {
+			if (guesses[i].user == loc.notify) {
 				return
 			}
 		}
 		
 		guesses.push({
-			user: loc.author,
+			user: loc.notify,
 			lat: loc.latitude,
 			lon: loc.longitude
 		})
