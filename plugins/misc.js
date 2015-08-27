@@ -21,7 +21,7 @@ bot.on("message",function(body,raw){
 bot.on("command",function(cmd,args){
 	if(cmd === "pirate"){
 		var output = "";
-		url = "http://isithackday.com/arrpi.php?text="+args.join(" ");
+		url = "http://postlikeapirate.com/AJAXtranslate.php?typing="+args.join(" ");
 
 		http.get(url,function(res){
 			res.on("data",function(chunk){
