@@ -1,3 +1,14 @@
+var plugin = {
+    "name" : "dictionary",
+    "description" : "The (urban)Dictionary command!",
+    "authors" : {
+        "Nick" : "Creator"
+    },
+    "collaborators" : {},
+    "version" : "0.2",
+    "protocol" : "1"
+};
+
 var http = require('http');
 
 bot.on("command", function(cmd, args){

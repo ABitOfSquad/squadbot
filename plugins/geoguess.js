@@ -1,3 +1,14 @@
+var plugin = {
+	"name" : "geoguess",
+	"description" : "Guess where this picture is taken!",
+	"authors" : {
+		"Lem Severein" : "Creator"
+	},
+	"collaborators" : {},
+	"version" : "0.1.0",
+	"protocol" : "1"
+};
+
 var locations = [
 	[46.742567, 23.431441],
 	[17.414358, 102.78485],

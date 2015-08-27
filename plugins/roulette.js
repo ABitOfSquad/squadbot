@@ -1,3 +1,14 @@
+var plugin = {
+    "name" : "roulette",
+    "description" : "A roulette plugin, that chooses a random unlucky one",
+    "authors" : {
+        "Lem Severein" : "Creator"
+    },
+    "collaborators" : {},
+    "version" : "1.1",
+    "protocol" : "1"
+};
+
 bot.on("command", function(cmd, args) {
     if (cmd == "roulette") {
         api.getMembers(function(members) {
