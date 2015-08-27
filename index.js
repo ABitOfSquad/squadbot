@@ -60,7 +60,7 @@ if (pluginList) {
             print("Loading " + pluginList[i] + "...")
 
             try {
-                require("./plugins/" + pluginList[i])
+                var plugin = require("./plugins/" + pluginList[i])
             } catch (err) {
                 print("Plugin " + pluginList[i] + " crashed with the following error:")
                 console.log(err.stack);

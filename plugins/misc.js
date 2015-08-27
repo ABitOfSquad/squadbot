@@ -1,3 +1,5 @@
+var http = require("http");
+
 var plugin = {
 	"name" : "misc",
 	"description" : "Lots of inside jokes, lots of crap",
@@ -18,13 +20,12 @@ bot.on("message",function(body,raw){
 
 bot.on("command",function(cmd,args){
 	if(cmd === "pirate"){
-		require("http");
 		var output = "";
 		url = "http://isithackday.com/arrpi.php?text="+args.join(" ");
 
 		http.get(url,function(res){
 			res.on("data",function(chunk){
-				output += chuck;
+				output += chunk;
 			}).on("end",function(){
 				api.send(output);
 			});
