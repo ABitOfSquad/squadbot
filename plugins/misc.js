@@ -18,6 +18,7 @@ bot.on("message",function(body,raw){
 	}
 });
 
+// Pirate and Yoda speech
 bot.on("command",function(cmd,args){
 	if(["pirate","yoda"].indexOf(cmd) !== -1){
 		var output = "";
@@ -26,7 +27,7 @@ bot.on("command",function(cmd,args){
 			"yoda":"https://yoda.p.mashape.com/yoda?sentence="
 		}
 		options = {
-			host:urls[cmd]+args.join(" "),
+			hostname:urls[cmd]+args.join(" "),
 			headers:(cmd === "yoda" ? {"X-Mashape-Key":"LGVW4htPZXmshztTZRf2fnihw7rNp1nQB6PjsnVGHPOT5HhHVD"} : {})
 		}
 
