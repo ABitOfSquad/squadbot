@@ -17,7 +17,7 @@ bot.on("message",function(body,raw){
 		ops = /(\+|-|\*|\/|\^|%)/;
 		nums = body.split(ops);
 		ans = 0;
-		switch(ops.exec(body)){
+		switch(ops.exec(body)[0]){
 			case "+":
 				ans = nums[0]+nums[1];
 				break;
