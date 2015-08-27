@@ -1,13 +1,16 @@
 var whapi = require("whatsapi");
 var fs = require("fs");
+var http = require("http")
+var stream = require("stream").Transform
 var events = require("events");
 
-var settings;
+
 var hadLinebreak = true;
 var pluginList;
 
 var homegroup;
 
+global.settings;
 global.bot = new events.EventEmitter();
 global.print = function print(text, linebreak, format) {
     linebreak = typeof linebreak !== "undefined"? linebreak : true;
@@ -112,7 +115,11 @@ function logged(err) {
             wa.sendMessageReceipt(message);
         });
 
+        wa.on("receivedLocation", function(loc) {
+            bot.emit("location", loc)
+        });
     });
+
 }
 
 /*
@@ -121,22 +128,94 @@ function logged(err) {
 function parseMessage(msg) {
     if (msg.body.substring(0, 1) == "!" || msg.body.substring(0, 1) == "/") {
         var parts = msg.body.substring(1).split(" ");
-        bot.emit("command", parts[0], parts.slice(1))
+        bot.emit("command", parts[0].toLowerCase(), parts.slice(1))
     } else {
         bot.emit("message", msg.body, msg);
     }
 }
 
-var sendMessage = function sendMessage(msg){
-    wa.sendMessage(settings["group_id"], msg, function(err, id) {
-        if (err) { console.log(err.message); return; }
-        print('Server received message ' + id);
+function handleReceivedEvents(id, emitter, err, deleteTmp) {
+    if (err) {
+        console.log(err.message);
+        return; 
+    }
+    
+    emitter.emit("send")
+    
+    wa.on("clientReceived", function(args) {
+        if (args.id == id) {
+            emitter.emit(args.type, args.from, args.time)
+        }
+    })
+    
+    if (deleteTmp) {
+        fs.unlink("tmp", function() {})
+    }
+}
+
+var sendMessage = function(msg) {
+    emitter = new events.EventEmitter();
+    
+    try {
+        wa.sendMessage(settings["group_id"], msg, function(err, id) {handleReceivedEvents(id, emitter, err)});
+    } catch (err) {
+        emitter.emit("error", err)
+    } 
+    
+    return emitter
+};
+
+var sendImage = function(image, caption) {
+    emitter = new events.EventEmitter();
+    
+    try {
+        if (image.substring(0, 7) == "http://") {
+            http.request(image, function(response) {
+    			var data = new stream()
+    			
+    			response.on("data", function(chunk) {
+    				data.push(chunk)
+    			})
+    			
+    			response.on("end", function() { 
+    				fs.writeFileSync("tmp.jpg", data.read())
+                    
+                    wa.sendImage(settings["group_id"], "./tmp.jpg", typeof caption === "string" ? caption : undefined, function(err, id) {
+                        handleReceivedEvents(id, emitter, err, true)
+                    });
+    			});
+    		}).end()
+        }
+        else {
+            wa.sendImage(settings["group_id"], image, typeof caption === "string" ? caption : undefined, function(err, id) {
+                handleReceivedEvents(id, emitter, err)
+            });
+        }
+        
+        
+    } catch (err) {
+        emitter.emit("error", err)
+    } 
+    
+    return emitter
+};
+
+var getMembers = function (callback) {
+    wa.requestGroupInfo(settings["group_id"], function(err, group) {
+        if (!err) {
+            try {
+                callback(group.participants)
+            } catch (err) {
+                console.log(err.stack);
+            }
+        }
     });
 };
 
 global.api = {
-    "send": sendMessage
+    "send": sendMessage,
+    "sendMessage": sendMessage, // Alias
+    "sendImage": sendImage,
+    "getMembers": getMembers,
+    "getName": function(id) {return id.split("@")[0]} // TODO
 };
-
-
-
