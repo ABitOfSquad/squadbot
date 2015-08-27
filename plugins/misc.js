@@ -28,7 +28,7 @@ bot.on("command",function(cmd,args){
 		}
 		options = {
 			host:urls[cmd][0],
-			path:urls[cmd][1]+args.join(" "),
+			path:urls[cmd][1]+encodeURI(args.join(" ")),
 			headers:(cmd === "yoda" ? {"X-Mashape-Key":"LGVW4htPZXmshztTZRf2fnihw7rNp1nQB6PjsnVGHPOT5HhHVD"} : {})
 		}
 
