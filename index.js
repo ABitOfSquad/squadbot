@@ -7,6 +7,7 @@ var events = require("events");
 
 var hadLinebreak = true;
 var pluginList;
+var typingTimeout
 
 var homegroup;
 
@@ -200,6 +201,62 @@ var sendImage = function(image, caption) {
     return emitter
 };
 
+var sendContact = function(fields) {
+    emitter = new events.EventEmitter();
+    
+    try {
+        var vcard = "BEGIN:VCARD"
+        vcard += "\nVERSION:3.0"
+        
+        if (!fields.name) {
+            throw "Missing contact name"
+        }
+        
+        for (var key in fields) {
+           if (fields.hasOwnProperty(key)) {
+               switch (key) {
+                   case "name":
+                        vcard += "\nN:" + fields[key]
+                        vcard += "\nFN:" + fields[key]
+                        break;
+                   case "phone":
+                        vcard += "TEL;TYPE=voice,home,pref:" + fields[key]
+                        break;
+                   case "email":
+                        vcard += "EMAIL:" + fields[key]
+                        break;
+                   default:
+                        throw "Unknown field " + key
+               }
+           }
+           
+           vcard += "\nEND:VCARD"
+           
+           fs.writeFileSync("./tmp/vcard.vcf", vcard)
+           wa.sendVcard(settings["group_id"], "./tmp/vcard.vcf", fields.name, function(err) {
+               console.log(err);
+               fs.unlink("./tmp/vcard.vcf", function() {})
+           })
+           
+           
+           console.log(vcard);
+       }
+    } catch (err) {
+        // emitter.emit("error", err.message)
+        console.log(err);
+    } 
+    
+    return emitter
+};
+
+var sendTyping = function(duration) {
+    wa.sendComposingState(settings["group_id"])
+        
+    typingTimeout = setTimeout(function() {
+        wa.sendPausedState(settings["group_id"])
+    }, duration)
+}
+
 var getMembers = function (callback) {
     wa.requestGroupInfo(settings["group_id"], function(err, group) {
         if (!err) {
@@ -216,6 +273,8 @@ global.api = {
     "send": sendMessage,
     "sendMessage": sendMessage, // Alias
     "sendImage": sendImage,
-    "getMembers": getMembers//,
-    //"getName": function(id) {return id.split("@")[0]} // TODO
+    "sendContact": sendContact,
+    "type": sendTyping,
+    "sendTyping": sendTyping, // Alias
+    "getMembers": getMembers,
 };
