@@ -16,7 +16,7 @@ bot.on("message",function(body,raw){
 	if(/^[0-9]+(\+|-|\*|\/|\^|%)[0-9]+$/.test(body)){
 		ops = /(\+|-|\*|\/|\^|%)/;
 		nums = body.split(ops);
-		ans = "";
+		ans = 0;
 		switch(ops.exec(body)){
 			case "+":
 				ans = nums[0]+nums[1];
@@ -25,7 +25,7 @@ bot.on("message",function(body,raw){
 				ans = nums[0]-nums[1];
 				break;
 			case "*":
-				ans = nums[0]*nums[1];S
+				ans = nums[0]*nums[1];
 				break;
 			case "/":
 				ans = nums[0]/nums[1];
@@ -42,10 +42,9 @@ bot.on("message",function(body,raw){
 
 // Various math commands
 bot.on("command",function(cmd,args){
-	if(args.length > 0 && args.every(function(val){
+	if(args.length === 0 || args.every(function(val){
 		return !isNaN(val);
 	})){
-		cmd = cmd.toLowerCase();
 		if(cmd === "rand"){
 			rand = Math.random();
 			min = (args.length === 0 ? 1 : parseInt(args[0]));
@@ -74,5 +73,4 @@ bot.on("command",function(cmd,args){
 	}else if(cmd === "e"){
 		api.send(Math.E.toString());
 	}
-
 });
