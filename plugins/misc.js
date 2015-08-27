@@ -21,29 +21,6 @@ bot.on("message",function(body,raw){
 
 // Pirate and Yoda speech
 bot.on("command",function(cmd,args){
-	if(["pirate","yoda"].indexOf(cmd) !== -1){
-		var output = "";
-		urls = {
-			"pirate":["postlikeapirate.com","/AJAXtranslate.php?typing="],
-			"yoda":["yoda.p.mashape.com","/yoda?sentence="]
-		}
-		options = {
-			hostname:urls[cmd][0],
-			path:urls[cmd][1]+encodeURI(args.join(" ")),
-			headers:(cmd === "yoda" ? {"X-Mashape-Key":"LGVW4htPZXmshztTZRf2fnihw7rNp1nQB6PjsnVGHPOT5HhHVD"} : {})
-		}
-
-		http.get(options,function(res){
-			res.on("data",function(chunk){
-				output += chunk;
-			}).on("end",function(){
-				api.send(output);
-			});
-		}).on("error",function(e){
-			console.log(cmd+" get request error: "+e.message);
-		});
-	}
-
 	if(cmd === "pirate"){
 		var output = "";
 		url = "http://postlikeapirate.com/AJAXtranslate.php?typing="+args.join(" ");
