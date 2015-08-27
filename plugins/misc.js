@@ -19,18 +19,25 @@ bot.on("message",function(body,raw){
 });
 
 bot.on("command",function(cmd,args){
-	if(cmd === "pirate"){
+	if(["pirate","yoda"].indexOf(cmd) !== -1){
 		var output = "";
-		url = "http://postlikeapirate.com/AJAXtranslate.php?typing="+args.join(" ");
+		urls = {
+			"pirate":"http://postlikeapirate.com/AJAXtranslate.php?typing=",
+			"yoda":"https://yoda.p.mashape.com/yoda?sentence="
+		}
+		options = {
+			host:urls[cmd]+args.join(" "),
+			headers:(cmd === "yoda" ? {"X-Mashape-Key":"LGVW4htPZXmshztTZRf2fnihw7rNp1nQB6PjsnVGHPOT5HhHVD"} : {})
+		}
 
-		http.get(url,function(res){
+		http.get(options,function(res){
 			res.on("data",function(chunk){
 				output += chunk;
 			}).on("end",function(){
 				api.send(output);
 			});
 		}).on("error",function(e){
-			console.log("Pirate error: "+e.message);
+			console.log(cmd+" get request error: "+e.message);
 		});
 	}
 });
