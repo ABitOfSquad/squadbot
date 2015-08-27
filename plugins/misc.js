@@ -1,4 +1,5 @@
 var http = require("http");
+var https = require("https");
 
 var plugin = {
 	"name" : "misc",
@@ -40,6 +41,39 @@ bot.on("command",function(cmd,args){
 			});
 		}).on("error",function(e){
 			console.log(cmd+" get request error: "+e.message);
+		});
+	}
+
+	if(cmd === "pirate"){
+		var output = "";
+		url = "http://postlikeapirate.com/AJAXtranslate.php?typing="+args.join(" ");
+		http.get(url,function(res){
+			res.on("data",function(chunk){
+				output += chunk;
+			}).on("end",function(){
+				api.send(output);
+			});
+		}).on("error",function(e){
+			console.log("Pirate get request error: "+e.message);
+		});
+	}else if(cmd === "yoda"){
+		var output = "";
+		options = {
+			hostname:"yoda.p.mashape.com",
+			path:"/yoda?sentence="+encodeURI(args.join(" ")),
+			port:443,
+			headers:{
+				"X-Mashape-Key":"LGVW4htPZXmshztTZRf2fnihw7rNp1nQB6PjsnVGHPOT5HhHVD"
+			}
+		}
+		https.get(options,function(res){
+			res.on("data",function(chunk){
+				output += chunk;
+			}).on("end",function(){
+				api.send(output);
+			});
+		}).on("error",function(e){
+			console.log("Yoda get request error: "+e.message);
 		});
 	}
 });
