@@ -23,11 +23,12 @@ bot.on("command",function(cmd,args){
 	if(["pirate","yoda"].indexOf(cmd) !== -1){
 		var output = "";
 		urls = {
-			"pirate":"http://postlikeapirate.com/AJAXtranslate.php?typing=",
-			"yoda":"https://yoda.p.mashape.com/yoda?sentence="
+			"pirate":["http://postlikeapirate.com","/AJAXtranslate.php?typing="],
+			"yoda":["https://yoda.p.mashape.com","/yoda?sentence="]
 		}
 		options = {
-			hostname:urls[cmd]+args.join(" "),
+			host:urls[cmd][0],
+			path:urls[cmd][1]+args.join(" "),
 			headers:(cmd === "yoda" ? {"X-Mashape-Key":"LGVW4htPZXmshztTZRf2fnihw7rNp1nQB6PjsnVGHPOT5HhHVD"} : {})
 		}
 
