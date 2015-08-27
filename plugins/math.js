@@ -25,7 +25,7 @@ bot.on("message",function(body,raw){
 				ans = nums[0]-nums[1];
 				break;
 			case "*":
-				ans = nums[0]*nums[1];
+				ans = nums[0]*nums[1];S
 				break;
 			case "/":
 				ans = nums[0]/nums[1];
@@ -42,7 +42,7 @@ bot.on("message",function(body,raw){
 
 // Various math commands
 bot.on("command",function(cmd,args){
-	if(args.every(function(val){
+	if(args.length > 0 && args.every(function(val){
 		return !isNaN(val);
 	})){
 		cmd = cmd.toLowerCase();
