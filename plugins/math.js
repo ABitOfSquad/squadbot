@@ -1,3 +1,16 @@
+var plugin = {
+	"name" : "math",
+	"description" : "A compilation of several math functions",
+	"authors" : {
+		"Daniel Mizrachi" : "Creator"
+	},
+	"collaborators" : {
+		"Nick Vernij" : "minor bug fixes"
+	},
+	"version" : "0.1.1",
+	"protocol" : "1"
+};
+
 // Evaluate equation in the form number[+|-|*|/|^|%]number
 bot.on("message",function(body,raw){
 	if(/^[0-9]+(\+|-|\*|\/|\^|%)[0-9]+$/.test(body)){
@@ -50,13 +63,16 @@ bot.on("command",function(cmd,args){
 				api.send(Math.sin(args[0]).toString());
 			}else if(cmd === "cos"){
 				api.send(Math.cos(args[0]).toString());
-			}else if(cmd === "tan"){
+			}else if(cmd === "tan") {
 				api.send(Math.tan(args[0]).toString());
-			}else if(cmd === "pi"){
-				api.send(Math.PI.toString());
-			}else if(cmd === "e"){
-				api.send(Math.E.toString());
 			}
 		}
 	}
+
+	if(cmd === "pi"){
+		api.send(Math.PI.toString());
+	}else if(cmd === "e"){
+		api.send(Math.E.toString());
+	}
+
 });
