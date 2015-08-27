@@ -20,16 +20,16 @@ bot.on("command",function(cmd,args){
 	if(cmd === "pirate"){
 		require("http");
 		var output = "";
-		http.request({
-			host:"http://isithackday.com",
-			path:"/arrpi.php?text="+args.join(" ")
-		},function(response){
-			response.on("data",function(data){
-				output += data;
-			});
-			response.on("end",function(){
+		url = "http://isithackday.com/arrpi.php?text="+args.join(" ");
+
+		http.get(url,function(res){
+			res.on("data",function(chunk){
+				output += chuck;
+			}).on("end",function(){
 				api.send(output);
 			});
-		}).end();
+		}).on("error",function(e){
+			console.log("Pirate error: "+e.message);
+		});
 	}
 });
