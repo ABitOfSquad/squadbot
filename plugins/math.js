@@ -14,8 +14,9 @@ var plugin = {
 // Evaluate equation in the form number[+|-|*|/|^|%]number
 bot.on("message",function(body,raw){
 	if(/^[0-9]+(\+|-|\*|\/|\^|%)[0-9]+$/.test(body)){
-		ops = /(\+|-|\*|\/|\^|%)/;
+		ops = /[\+\-\*\/\^%]/;
 		nums = body.split(ops);
+		nums = [parseInt(nums[0]),parseInt(nums[1])];
 		ans = 0;
 		switch(ops.exec(body)[0]){
 			case "+":
@@ -35,6 +36,7 @@ bot.on("message",function(body,raw){
 				break;
 			case "%":
 				ans = nums[0]%nums[1];
+				break;
 		}
 		api.send(ans.toString());
 	}
