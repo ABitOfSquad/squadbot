@@ -55,7 +55,7 @@ bot.on("command", function(cmd, args) {
 		guesses = []
 		
 		url = "http://maps.googleapis.com/maps/api/streetview?size=640x640&location=" + location[0] + "," + location[1] + "&fov=100"
-		bot.sendImage(url, ":japanese_castle: Time to play Geoguesser! :japanese_castle:\n\nShare the location of where you think this streetview was made. (you only have 60 seconds, so be quick)")
+		bot.sendImage(url, ":japanese_castle: Time to play Geoguesser! :european_castle:\n\nShare the location of where you think this streetview was made. (you only have 60 seconds, so be quick)")
 		
 		setTimeout(function () {
 			function getSortedKeys(obj) {
@@ -65,6 +65,10 @@ bot.on("command", function(cmd, args) {
 			
 			var best
 			var worst
+			
+			if (guesses.length == 0) {
+				return
+			}
 
 			for (var i = 0; i < guesses.length; i++) {
 				var kmOff = getDistance(guesses[i].lat, guesses[i].lon, location[0], location[1])
@@ -80,14 +84,14 @@ bot.on("command", function(cmd, args) {
 				}
 			}
 			
-			var endText = "🎉 " + best.user.toUpperCase() + " HAS WON!!1 :tada:"
+			var endText = ":tada: " + best.user.toUpperCase() + " HAS WON!!1 :tada:"
 			endText += "\n" + best.user + " was only " + best.kmOff + " km off"
 			bot.send(endText)
 			
 			if (best.user != worst.user) {
 				setTimeout(function () {
 					var endText = worst.user + " is a different story though..."
-					endText += "\nHe/she was like " + worst.kmOff + " km off 😭"
+					endText += "\nHe/she was like " + worst.kmOff + " km off :sob:"
 					bot.send(endText)
 				}, 50)
 			}

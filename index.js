@@ -63,8 +63,9 @@ if (pluginList) {
 
     print("All plugins loaded")
 }
-print("Plugins loaded");
-//WHATSAPI INIT
+
+print("Plugins loaded")
+
 var wa = whapi.createAdapter({
     msisdn: settings["telnumber"], // phone number with country code
     username: settings["displayname"], // your name on WhatsApp
@@ -74,9 +75,11 @@ var wa = whapi.createAdapter({
 wa.setMaxListeners(250)
 
 wa.connect(function connected(err) {
-    if (err) { console.log(err); return; }
-    print('Connected');
-    // Now login
+    if (err) {
+        return console.log(err)
+    }
+    
+    print("Connected");
     wa.login(logged);
 });
 
@@ -93,8 +96,6 @@ function logged(err) {
             //recognize main beta group
             if(g.groupId == settings["group_id"]){
                 homegroup = g;
-                //console.log(g);
-                //console.log(homegroup);
                 print("Found squadbot's home group");
             }
         });
@@ -136,16 +137,7 @@ function encodeEmoji(msg) {
     return output
 }
 
-function parseMessage(msg) {
-    if (msg.body.substring(0, 1) == "!" || msg.body.substring(0, 1) == "/") {
-        var parts = msg.body.substring(1).split(" ");
-        bot.emit("command", parts[0].toLowerCase(), parts.slice(1))
-    } else {
-        bot.emit("message", msg.body, msg);
-    }
-}
-
-function handleReceivedEvents(id, emitter, err, deleteTmp) {
+function handleReceivedEvents(id, emitter, err) {
     function recv(args) {
         if (args.id == id) {
             emitter.emit(args.type, args.from, args.time)
@@ -161,13 +153,18 @@ function handleReceivedEvents(id, emitter, err, deleteTmp) {
     
     wa.on("clientReceived", recv)
     
-    if (deleteTmp) {
-        fs.unlink(deleteTmp, function() {})
-    }
-    
     setTimeout(function () {
         wa.removeListener("clientReceived", recv);
-    }, 100);
+    }, 900000); // Remove after 15 min to free memory
+}
+
+function parseMessage(msg) {
+    if (msg.body.substring(0, 1) == "!" || msg.body.substring(0, 1) == "/") {
+        var parts = msg.body.substring(1).split(" ");
+        bot.emit("command", parts[0].toLowerCase(), parts.slice(1))
+    } else {
+        bot.emit("message", msg.body, msg);
+    }
 }
 
 bot.send = bot.sendMessage = function(msg) {
@@ -182,40 +179,65 @@ bot.send = bot.sendMessage = function(msg) {
     return emitter
 };
 
-bot.sendImage = function(image, caption) {
+function sendMedia(location, mimes, suffix, type, caption) {
     emitter = new events.EventEmitter();
     
     try {
-        if (image.substring(0, 7) == "http://") {
-            http.request(image, function(response) {
-    			var data = new stream()
-    			
-    			response.on("data", function(chunk) {
-    				data.push(chunk)
-    			})
-    			
-    			response.on("end", function() { 
-    				fs.writeFileSync("./tmp/image.jpg", data.read())
+        if (location.substring(0, 7) == "http://") {
+            http.request(location, function(response) {
+                if (mimes) {
+                    if (response.headers["content-type"]) {
+                        if (mimes.indexOf(response.headers["content-type"]) == -1) {
+                            emitter.emit("err", "Server sends an unsupported file type")
+                        }
+                    }
+                }
+                var data = new stream()
+                
+                response.on("data", function(chunk) {
+                    data.push(chunk)
+                })
+                
+                response.on("error", function(err) {
+                    emitter.emit("error", err.message)
+                });
+                
+                response.on("end", function() {
+                    var file = "./tmp/tmp-" + Math.round(Math.random() * 10000000) + "." + suffix
                     
-                    wa.sendImage(settings["group_id"], "./tmp/image.jpg", typeof caption === "string" ? encodeEmoji(caption) : undefined, function(err, id) {
-                        handleReceivedEvents(id, emitter, err, "./tmp/image.jpg")
-                    });
-    			});
-    		}).end()
+                    fs.writeFileSync(file, data.read())
+                    
+                    if (type == "sendAudio") {
+                        wa[type](settings["group_id"], file, function(err, id) {handleReceivedEvents(id, emitter, err)})
+                    }
+                    else {
+                        wa[type](settings["group_id"], file, encodeEmoji(caption), function(err, id) {handleReceivedEvents(id, emitter, err)})
+                    }
+                });
+            }).end()
         }
         else {
-            wa.sendImage(settings["group_id"], image, typeof caption === "string" ? encodeEmoji(caption) : undefined, function(err, id) {
-                handleReceivedEvents(id, emitter, err)
-            });
+            if (type == "sendAudio") {
+                wa[type](settings["group_id"], location, function(err, id) {handleReceivedEvents(id, emitter, err)})
+            }
+            else {
+                wa[type](settings["group_id"], location, encodeEmoji(caption), function(err, id) {handleReceivedEvents(id, emitter, err)})
+            }
         }
         
         
     } catch (err) {
-        emitter.emit("error", err)
+        console.log(err.stack);
+        emitter.emit("err", err.message)
     } 
     
     return emitter
-};
+}
+
+bot.sendImage = function(image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption)}
+bot.sendVideo = function(video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption)}
+bot.sendAudio = function(audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio")}
+
 
 bot.sendContact = function(fields) {
     emitter = new events.EventEmitter();

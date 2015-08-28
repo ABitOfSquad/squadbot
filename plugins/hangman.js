@@ -101,7 +101,7 @@ bot.on("command", function(cmd, args) {
 	}
 
 	
-	if (cmd == "hangman" && words == "") {
+	if (cmd == "hangman" && word == "") {
 		word = words[Math.floor(Math.random() * words.length)].toUpperCase()
 		
 		bot.send("🎲 We're playing hangman! 🎮\n\nGuess a letter or whole word by using /guess.")
@@ -112,6 +112,10 @@ bot.on("command", function(cmd, args) {
 	}
 	else if (cmd == "guess" && word && args[0]) {
 		args[0] = args[0].toUpperCase()
+		
+		if (!args[0].match(/[A-Z]/i)) {
+			return
+		}
 		
 		if (args[0].length == 1 && letters.indexOf(args[0]) == -1) {
 			letters.push(args[0])
@@ -159,8 +163,10 @@ bot.on("command", function(cmd, args) {
 				if (stagesOfHang.length == errors) {
 					setTimeout(function() {
 						bot.send('He\'s dead, thanks to you.\nThe word was "' + word.toLowerCase() + '"')
+						reset()
 					}, 200)
-					return reset()
+					
+					return 
 				}
 				
 				setTimeout(function() {
