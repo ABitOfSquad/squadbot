@@ -32,6 +32,9 @@ We are planning on making Squadbot available for different platforms, the API wi
 * IRC
 * Telegram
 
+#### Emojis
+Emojis work the same way as on github, just add `:name_of_emoji:` to a string and Squadbot will replace it with an emoji. Go to [emoji-cheat-sheet.com](http://www.emoji-cheat-sheet.com/) to see all emojis and their names.
+
 #### Legal
 Using whatsapp sockets is forbidden by their EULA. Squadbot has been created with the aim to learn more about bots, Reverse engineering and AI, this means this repository can never be used for either commercial purposes, or educational purposes on a larger scale. For these purposes you should consider using other protocols such as Telegram and IRC. **WE DO NOT SUPPORT BULK MESSAGES, OR 24/7 USE OF THIS BOT, WHATSAPP ISN'T DESIGNED FOR THIS, AND YOU SHOULD CONSIDER A DIFFERENT PROTOCOL WHEN DOING SO**
 

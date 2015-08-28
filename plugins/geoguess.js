@@ -55,7 +55,7 @@ bot.on("command", function(cmd, args) {
 		guesses = []
 		
 		url = "http://maps.googleapis.com/maps/api/streetview?size=640x640&location=" + location[0] + "," + location[1] + "&fov=100"
-		bot.sendImage(url, "🏰 Time to play Geoguesser! 🏯\n\nShare the location of where you think this streetview was made. (you only have 60 seconds, so be quick)")
+		bot.sendImage(url, ":japanese_castle: Time to play Geoguesser! :japanese_castle:\n\nShare the location of where you think this streetview was made. (you only have 60 seconds, so be quick)")
 		
 		setTimeout(function () {
 			function getSortedKeys(obj) {
@@ -80,7 +80,7 @@ bot.on("command", function(cmd, args) {
 				}
 			}
 			
-			var endText = "🎉 " + best.user.toUpperCase() + " HAS WON!!1 🎉"
+			var endText = "🎉 " + best.user.toUpperCase() + " HAS WON!!1 :tada:"
 			endText += "\n" + best.user + " was only " + best.kmOff + " km off"
 			bot.send(endText)
 			
