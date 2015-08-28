@@ -4,33 +4,19 @@ var http = require("http")
 var stream = require("stream").Transform
 var events = require("events");
 
-
-var hadLinebreak = true;
 var pluginList;
 var typingTimeout
-
 var homegroup;
 
 global.settings;
-global.print = function print(text, linebreak, format) {
-    linebreak = typeof linebreak !== "undefined"? linebreak : true;
-    format = typeof format !== "undefined" ? format : true;
+global.print = function print(text) {
+    var d = new Date()
+    var h = (d.getHours() < 10 ? "0" : "") + d.getHours()
+    var m = (d.getMinutes() < 10 ? "0" : "") + d.getMinutes()
+    var s = (d.getSeconds() < 10 ? "0" : "") + d.getSeconds()
 
-    if (format) {
-        if (!hadLinebreak) {
-            process.stdout.write("\n\r")
-        }
-
-        var d = new Date()
-        var h = (d.getHours() < 10 ? "0" : "") + d.getHours()
-        var m = (d.getMinutes() < 10 ? "0" : "") + d.getMinutes()
-        var s = (d.getSeconds() < 10 ? "0" : "") + d.getSeconds()
-        process.stdout.write("[" + h + ":" + m + ":" + s + "] ")
-    }
-
-    process.stdout.write(text + (linebreak ? "\n\r" : " "))
-    hadLinebreak = linebreak
-};
+    console.log("[" + h + ":" + m + ":" + s + "] " + text + "\n")
+}
 
 global.bot = new events.EventEmitter()
 bot.setMaxListeners(250)
