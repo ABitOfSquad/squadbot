@@ -1,5 +1,9 @@
+bot.private.on("message", function(msg, who) {
+	bot.private.sendImage(who, "https://www.google.nl/images/srpr/logo11w.png")
+})
+
 bot.on("command", function(cmd, args) {
 	if (cmd == "test") { 
-        bot.sendAudio("http://www.audiocheck.net/download.php?filename=Audio/audiocheck.net_hdchirp_88k_-3dBFS_lin.wav")
+        bot.sendImage("https://www.google.nl/images/srpr/logo11w.png")
     }
 })

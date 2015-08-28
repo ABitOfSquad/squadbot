@@ -19,31 +19,31 @@ global.print = function print(text) {
 }
 
 global.bot = new events.EventEmitter()
+bot.private = new events.EventEmitter()
 bot.setMaxListeners(250)
 
 var emojis = JSON.parse(fs.readFileSync("emoji.json", "utf8"))
 
-// console.log(process.argv[process.argv.length - 1]);
-
-/**
- * INITIALIZATION
- */
-// LOAD SETTINGS
 try {
     settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'))
-} catch (err) {
-    print("could not load settings file");
+} 
+catch (err) {
+    print("Could not load settings file");
     process.exit();
 }
+
 print("Settings loaded");
-// LOAD PLUGINS
+
 try {
     pluginList = fs.readdirSync("plugins")
-} catch (err) {
+} 
+catch (err) {
     pluginList = false;
+    
     print("Could not load contents of plugin folder");
     process.exit();
 }
+
 if (pluginList) {
     if (pluginList.length == 0) {
         print("No plugins found")
@@ -70,7 +70,7 @@ var wa = whapi.createAdapter({
     msisdn: settings["telnumber"], // phone number with country code
     username: settings["displayname"], // your name on WhatsApp
     password: settings["whatsapp_pass"], // WhatsApp password
-    ccode: '44' // country code
+    ccode: "44" // country code
 });
 wa.setMaxListeners(250)
 
@@ -101,23 +101,47 @@ function logged(err) {
         });
 
         if(!homegroup) {
-            print("could not find group...")
+            print("Could not find group")
             process.exit();
         }
 
-        wa.on('receivedMessage', function(message) {
-            parseMessage(message);
+        wa.on("receivedMessage", function(message) {
+            console.log(message);
+            if (message.from.split("@")[0] == settings["group_id"]) {
+                
+                if (message.body.substring(0, 1) == "!" || message.body.substring(0, 1) == "/") {
+                    var parts = message.body.substring(1).split(" ");
+                    
+                    bot.emit("command", parts[0].toLowerCase(), parts.slice(1))
+                } else {
+                    bot.emit("message", message.body, message);
+                }
+            }
+            else if (!message.isGroup) {
+                if (message.body.substring(0, 1) == "!" || message.body.substring(0, 1) == "/") {
+                    var parts = message.body.substring(1).split(" ");
+                    
+                    bot.private.emit("command", parts[0].toLowerCase(), message.from, parts.slice(1))
+                } else {
+                    bot.private.emit("message", message.body, message.from, message);
+                }
+            }
+            
             wa.sendMessageReceipt(message);
-        });
+        })
 
         wa.on("receivedLocation", function(loc) {
             bot.emit("location", loc)
-        });
+        })
     });
 
 }
 
 function encodeEmoji(msg) {
+    if (!msg) {
+        return
+    }
+    
     var parts = msg.split(":")
     var output = ""
     
@@ -158,29 +182,38 @@ function handleReceivedEvents(id, emitter, err) {
     }, 900000); // Remove after 15 min to free memory
 }
 
-function parseMessage(msg) {
-    if (msg.body.substring(0, 1) == "!" || msg.body.substring(0, 1) == "/") {
-        var parts = msg.body.substring(1).split(" ");
-        bot.emit("command", parts[0].toLowerCase(), parts.slice(1))
-    } else {
-        bot.emit("message", msg.body, msg);
-    }
-}
-
-bot.send = bot.sendMessage = function(msg) {
+bot.private.send = bot.private.sendMessage = function(to, msg) {bot.sendMessage(msg, to)}
+bot.send = bot.sendMessage = function(msg, to) {
     emitter = new events.EventEmitter();
     
+    var to = to ? to : settings["group_id"]
+    
     try {
-        wa.sendMessage(settings["group_id"], encodeEmoji(msg), function(err, id) {handleReceivedEvents(id, emitter, err)});
+        wa.sendMessage(to, encodeEmoji(msg), function(err, id) {handleReceivedEvents(id, emitter, err)});
     } catch (err) {
         emitter.emit("error", err)
     } 
     
     return emitter
-};
+}
 
-function sendMedia(location, mimes, suffix, type, caption) {
+// IT ALL MADE SENSE IN MY HEAD OKAY
+bot.private.sendImage = function(to, image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption, to)}
+bot.sendImage = function(image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption)}
+bot.private.sendVideo = function(to, video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption, to)}
+bot.sendVideo = function(video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption)}
+bot.private.sendAudio = function(to, audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio", to)}
+bot.sendAudio = function(audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio")}
+
+function sendMedia(location, mimes, suffix, type, caption, to) {
     emitter = new events.EventEmitter();
+    
+    if (type == "sendAudio") {
+        var to = caption ? caption : settings["group_id"]
+    }
+    else {
+        var to = to ? to : settings["group_id"]
+    }
     
     try {
         if (location.substring(0, 7) == "http://") {
@@ -208,20 +241,20 @@ function sendMedia(location, mimes, suffix, type, caption) {
                     fs.writeFileSync(file, data.read())
                     
                     if (type == "sendAudio") {
-                        wa[type](settings["group_id"], file, function(err, id) {handleReceivedEvents(id, emitter, err)})
+                        wa[type](to, file, function(err, id) {handleReceivedEvents(id, emitter, err)})
                     }
                     else {
-                        wa[type](settings["group_id"], file, encodeEmoji(caption), function(err, id) {handleReceivedEvents(id, emitter, err)})
+                        wa[type](to, file, encodeEmoji(caption), function(err, id) {handleReceivedEvents(id, emitter, err)})
                     }
                 });
             }).end()
         }
         else {
             if (type == "sendAudio") {
-                wa[type](settings["group_id"], location, function(err, id) {handleReceivedEvents(id, emitter, err)})
+                wa[type](to, location, function(err, id) {handleReceivedEvents(id, emitter, err)})
             }
             else {
-                wa[type](settings["group_id"], location, encodeEmoji(caption), function(err, id) {handleReceivedEvents(id, emitter, err)})
+                wa[type](to, location, encodeEmoji(caption), function(err, id) {handleReceivedEvents(id, emitter, err)})
             }
         }
         
@@ -234,13 +267,11 @@ function sendMedia(location, mimes, suffix, type, caption) {
     return emitter
 }
 
-bot.sendImage = function(image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption)}
-bot.sendVideo = function(video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption)}
-bot.sendAudio = function(audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio")}
 
-
-bot.sendContact = function(fields) {
+bot.private.sendContact = function(to, fields) {bot.sendContact(fields, to)}
+bot.sendContact = function(fields, to) {
     emitter = new events.EventEmitter();
+    var to = to ? to : settings["group_id"]
     
     try {
         var vcard = "BEGIN:VCARD"
@@ -272,19 +303,21 @@ bot.sendContact = function(fields) {
        vcard += "\nEND:VCARD"
        
        fs.writeFileSync("./tmp/vcard.vcf", vcard)
-       wa.sendVcard(settings["group_id"], "./tmp/vcard.vcf", fields.name, function(err, id) {handleReceivedEvents(id, emitter, err, "./tmp/vcard.vcf")})
+       wa.sendVcard(to, "./tmp/vcard.vcf", fields.name, function(err, id) {handleReceivedEvents(id, emitter, err, "./tmp/vcard.vcf")})
     } catch (err) {
-        emitter.emit("error", err)
+        emitter.emit("err", err)
     } 
     
     return emitter
 };
 
-bot.type = bot.sendTyping = function(duration) {
-    wa.sendComposingState(settings["group_id"])
+bot.private.type = bot.private.sendTyping = function(to, duration) {bot.sendTyping(duration, to)}
+bot.type = bot.sendTyping = function(duration, to) {
+    var to = to ? to : settings["group_id"]
+    wa.sendComposingState(to)
         
     typingTimeout = setTimeout(function() {
-        wa.sendPausedState(settings["group_id"])
+        wa.sendPausedState(sto)
     }, duration)
 }
 
