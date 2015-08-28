@@ -33,6 +33,7 @@ global.print = function print(text, linebreak, format) {
 };
 
 global.bot = new events.EventEmitter()
+bot.setMaxListeners(250)
 
 // console.log(process.argv[process.argv.length - 1]);
 
@@ -82,6 +83,7 @@ var wa = whapi.createAdapter({
     password: settings["whatsapp_pass"], // WhatsApp password
     ccode: '44' // country code
 });
+wa.setMaxListeners(250)
 
 wa.connect(function connected(err) {
     if (err) { console.log(err); return; }
@@ -139,6 +141,12 @@ function parseMessage(msg) {
 }
 
 function handleReceivedEvents(id, emitter, err, deleteTmp) {
+    function recv(args) {
+        if (args.id == id) {
+            emitter.emit(args.type, args.from, args.time)
+        }
+    }
+    
     if (err) {
         console.log(err.message);
         return; 
@@ -146,15 +154,15 @@ function handleReceivedEvents(id, emitter, err, deleteTmp) {
     
     emitter.emit("send")
     
-    wa.on("clientReceived", function(args) {
-        if (args.id == id) {
-            emitter.emit(args.type, args.from, args.time)
-        }
-    })
+    wa.on("clientReceived", recv)
     
     if (deleteTmp) {
         fs.unlink(deleteTmp, function() {})
     }
+    
+    setTimeout(function () {
+        wa.removeListener("clientReceived", recv);
+    }, 100);
 }
 
 bot.send = bot.sendMessage = function(msg) {
