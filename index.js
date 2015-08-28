@@ -150,7 +150,7 @@ function handleReceivedEvents(id, emitter, err, deleteTmp) {
     })
     
     if (deleteTmp) {
-        fs.unlink("tmp", function() {})
+        fs.unlink(deleteTmp, function() {})
     }
 }
 
@@ -179,10 +179,10 @@ var sendImage = function(image, caption) {
     			})
     			
     			response.on("end", function() { 
-    				fs.writeFileSync("tmp.jpg", data.read())
+    				fs.writeFileSync("./tmp/image.jpg", data.read())
                     
-                    wa.sendImage(settings["group_id"], "./tmp.jpg", typeof caption === "string" ? caption : undefined, function(err, id) {
-                        handleReceivedEvents(id, emitter, err, true)
+                    wa.sendImage(settings["group_id"], "./tmp/image.jpg", typeof caption === "string" ? caption : undefined, function(err, id) {
+                        handleReceivedEvents(id, emitter, err, "./tmp/image.jpg")
                     });
     			});
     		}).end()
@@ -220,30 +220,23 @@ var sendContact = function(fields) {
                         vcard += "\nFN:" + fields[key]
                         break;
                    case "phone":
-                        vcard += "TEL;TYPE=voice,home,pref:" + fields[key]
+                        vcard += "\nTEL;TYPE=voice,home,pref:" + fields[key]
                         break;
                    case "email":
-                        vcard += "EMAIL:" + fields[key]
+                        vcard += "\nEMAIL:" + fields[key]
                         break;
                    default:
                         throw "Unknown field " + key
                }
            }
-           
-           vcard += "\nEND:VCARD"
-           
-           fs.writeFileSync("./tmp/vcard.vcf", vcard)
-           wa.sendVcard(settings["group_id"], "./tmp/vcard.vcf", fields.name, function(err) {
-               console.log(err);
-               fs.unlink("./tmp/vcard.vcf", function() {})
-           })
-           
-           
-           console.log(vcard);
        }
+       
+       vcard += "\nEND:VCARD"
+       
+       fs.writeFileSync("./tmp/vcard.vcf", vcard)
+       wa.sendVcard(settings["group_id"], "./tmp/vcard.vcf", fields.name, function(err, id) {handleReceivedEvents(id, emitter, err, "./tmp/vcard.vcf")})
     } catch (err) {
-        // emitter.emit("error", err.message)
-        console.log(err);
+        emitter.emit("error", err)
     } 
     
     return emitter
@@ -269,6 +262,31 @@ var getMembers = function (callback) {
     });
 };
 
+function checkIfAdmin(callback) {
+    wa.requestGroupInfo(settings["group_id"], function(err, data) {
+        if (err) {
+            try {
+                callback(err, null)
+            } catch (err) {
+                console.log(err.stack);
+            }
+            return
+        }
+        
+        for (var i = 0; i < data.participants.length; i++) {
+            if (data.participants[i].jid.split("@")[0] == settings["telnumber"]) {
+                try {
+                    callback(false, data.participants[i].admin)
+                } catch (err) {
+                    console.log(err.stack);
+                }
+                
+                console.log(data.participants[i]);
+            }
+        }
+    })
+}
+
 global.api = {
     "send": sendMessage,
     "sendMessage": sendMessage, // Alias
@@ -277,4 +295,7 @@ global.api = {
     "type": sendTyping,
     "sendTyping": sendTyping, // Alias
     "getMembers": getMembers,
+    "admin": {
+        "check": checkIfAdmin
+    }
 };
