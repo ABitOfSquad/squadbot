@@ -15,11 +15,13 @@ global.print = function print(text) {
     var m = (d.getMinutes() < 10 ? "0" : "") + d.getMinutes()
     var s = (d.getSeconds() < 10 ? "0" : "") + d.getSeconds()
 
-    console.log("[" + h + ":" + m + ":" + s + "] " + text + "\n")
+    console.log("[" + h + ":" + m + ":" + s + "] " + text)
 }
 
 global.bot = new events.EventEmitter()
 bot.setMaxListeners(250)
+
+var emojis = JSON.parse(fs.readFileSync("emoji.json", "utf8"))
 
 // console.log(process.argv[process.argv.length - 1]);
 
@@ -114,9 +116,26 @@ function logged(err) {
 
 }
 
-/*
- API FUNCTIONS
- */
+function encodeEmoji(msg) {
+    var parts = msg.split(":")
+    var output = ""
+    
+    for (var i = 0; i < parts.length; i++) {
+        if (emojis[parts[i]]) {
+            output += emojis[parts[i]]
+        }
+        else {
+            if (i != 0 && !emojis[parts[i - 1]]) {
+                output += ":"
+            }
+            
+            output += parts[i]
+        }
+    }
+    
+    return output
+}
+
 function parseMessage(msg) {
     if (msg.body.substring(0, 1) == "!" || msg.body.substring(0, 1) == "/") {
         var parts = msg.body.substring(1).split(" ");
@@ -155,7 +174,7 @@ bot.send = bot.sendMessage = function(msg) {
     emitter = new events.EventEmitter();
     
     try {
-        wa.sendMessage(settings["group_id"], msg, function(err, id) {handleReceivedEvents(id, emitter, err)});
+        wa.sendMessage(settings["group_id"], encodeEmoji(msg), function(err, id) {handleReceivedEvents(id, emitter, err)});
     } catch (err) {
         emitter.emit("error", err)
     } 
@@ -178,14 +197,14 @@ bot.sendImage = function(image, caption) {
     			response.on("end", function() { 
     				fs.writeFileSync("./tmp/image.jpg", data.read())
                     
-                    wa.sendImage(settings["group_id"], "./tmp/image.jpg", typeof caption === "string" ? caption : undefined, function(err, id) {
+                    wa.sendImage(settings["group_id"], "./tmp/image.jpg", typeof caption === "string" ? encodeEmoji(caption) : undefined, function(err, id) {
                         handleReceivedEvents(id, emitter, err, "./tmp/image.jpg")
                     });
     			});
     		}).end()
         }
         else {
-            wa.sendImage(settings["group_id"], image, typeof caption === "string" ? caption : undefined, function(err, id) {
+            wa.sendImage(settings["group_id"], image, typeof caption === "string" ? encodeEmoji(caption) : undefined, function(err, id) {
                 handleReceivedEvents(id, emitter, err)
             });
         }
@@ -213,8 +232,8 @@ bot.sendContact = function(fields) {
            if (fields.hasOwnProperty(key)) {
                switch (key) {
                    case "name":
-                        vcard += "\nN:" + fields[key]
-                        vcard += "\nFN:" + fields[key]
+                        vcard += "\nN:" + encodeEmoji(fields[key])
+                        vcard += "\nFN:" + encodeEmoji(fields[key])
                         break;
                    case "phone":
                         vcard += "\nTEL;TYPE=voice,home,pref:" + fields[key]
