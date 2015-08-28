@@ -1,5 +1,5 @@
 # whatsapi-Squadbot
-A Bridge over the Node-whatsapi to run squadbot applications. API can be found in main squadbot repo
+A Bridge over the Node-whatsapi to run squadbot applications. The API we are using is our successor of the Node Whatsapi project, which got discontinued.
 
 #### Settings.json
 Squadbot requires a ```Settings.json``` file to work. This file needs to be created in the same direactory as ```Index.js```. The file needs to have the following variables. More information on how to extract passwords can be found [here](https://github.com/ABitOfSquad/WA-password/).
@@ -23,7 +23,7 @@ bot.on("message", function(msg, raw) {api.send("someone said: " + msg)})
 The only thing you need to do to load the plugin, is place it in the ```/plugins``` folder, Squadbot will do the rest.
 
 #### Contributing
-Feel free to contribute, however significant API changes have a chance of not being accepted, since we like to design the API with our full team. If you wrote a plugin for squadbot, Awesome! However plugins are not accepted in this repository, add it to your own repo, and feel free to share it with us! There are plans to create a node-like SPM (spm -> Squadbot Package Manager), but this is something we want to do for when we will publish squadbot cross-protocol. But for now, we might create a list somewhere of available plugins.
+Feel free to contribute, however significant API changes have a chance of not being accepted, since we like to design the API with our full team. If you wrote a plugin for squadbot, Awesome! However plugins are not accepted in this repository, add it to your own repo, and feel free to share it with us! There are plans to create a npm-like SPM (spm -> Squadbot Package Manager), but this is something we want to do for when we will publish squadbot cross-protocol. But for now, we might create a list somewhere of available plugins.
 
 #### Cross Protocol
 We are planning on making Squadbot available for different platforms, the API will always be beta tested and updated first in the Whatsapi-Squadbot. We are planning on developing for the following platforms. In case you have plans for another platform, feel free to send us a message!
