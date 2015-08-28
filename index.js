@@ -34,6 +34,8 @@ global.print = function print(text, linebreak, format) {
 
 global.bot = new events.EventEmitter()
 
+// console.log(process.argv[process.argv.length - 1]);
+
 /**
  * INITIALIZATION
  */

@@ -15,7 +15,7 @@ var plugin = {
 // xD detection
 bot.on("message",function(body,raw){
 	if(body.toLowerCase().indexOf("xd") !== -1){
-		api.send("xDxDxDxDxD!!!1!1!!1!");
+		bot.send("xDxDxDxDxD!!!1!1!!1!");
 	}
 });
 
@@ -28,7 +28,7 @@ bot.on("command",function(cmd,args){
 			res.on("data",function(chunk){
 				output += chunk;
 			}).on("end",function(){
-				api.send(output);
+				bot.send(output);
 			});
 		}).on("error",function(e){
 			console.log("Pirate get request error: "+e.message);
@@ -47,7 +47,7 @@ bot.on("command",function(cmd,args){
 			res.on("data",function(chunk){
 				output += chunk;
 			}).on("end",function(){
-				api.send(output);
+				bot.send(output);
 			});
 		}).on("error",function(e){
 			console.log("Yoda get request error: "+e.message);

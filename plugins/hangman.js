@@ -11,6 +11,6 @@ var stagesOfHang = [
 
 bot.on("command", function(cmd, args) {
 	if (cmd == "hangman") {
-        api.send(stagesOfHang[0])
+        bot.send(stagesOfHang[0])
 	}
 })

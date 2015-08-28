@@ -32,8 +32,8 @@ function urbandefine (input){
             res.on('end', function(){
                 var _data = JSON.parse(body);
                 var data = _data.list[0];
-                api.send(input + ": " + data.definition);
-                api.send('Example: ' + data.example);
+                bot.send(input + ": " + data.definition);
+                bot.send('Example: ' + data.example);
             })
         }
     }).on('error', function(e) {

@@ -11,7 +11,7 @@ var plugin = {
 
 bot.on("command", function(cmd, args) {
     if (cmd == "roulette") {
-        api.getMembers(function(members) {
+        bot.getMembers(function(members) {
             if (args) {
                 var unluckyOne = args[Math.floor(Math.random() * args.length)]
             }
@@ -26,14 +26,14 @@ bot.on("command", function(cmd, args) {
             console.log(args);
             console.log(members);
             
-            api.send("Picking a random squadmember...")
+            bot.send("Picking a random squadmember...")
             
             setTimeout(function() {
                 if (args) {
-                    api.send("It's " + unluckyOne + "!")
+                    bot.send("It's " + unluckyOne + "!")
                 }
                 else {
-                    api.send("It's +" + unluckyOne + "!")
+                    bot.send("It's +" + unluckyOne + "!")
                 }
             }, 3000)
         })

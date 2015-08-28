@@ -38,7 +38,7 @@ bot.on("message",function(body,raw){
 				ans = nums[0]%nums[1];
 				break;
 		}
-		api.send(ans.toString());
+		bot.send(ans.toString());
 	}
 });
 
@@ -51,28 +51,28 @@ bot.on("command",function(cmd,args){
 			rand = Math.random();
 			min = (args.length === 0 ? 1 : parseInt(args[0]));
 			max = (args.length === 0 ? 10 : parseInt(args[1]));
-			api.send((Math.floor((rand*max)+min).toString()));
+			bot.send((Math.floor((rand*max)+min).toString()));
 		}else if(args.length > 0){
 			if(cmd === "sqrt" || cmd === "squareroot"){
 				n = Math.sqrt(args[0]);
 				fixed = n.toFixed(3);
 				if(n>0){
 					x = (fixed[fixed.length-1] === 0 ? n.toString() : fixed+" (3dp)");
-					api.send(x);
+					bot.send(x);
 				}
 			}else if(cmd === "sin"){
-				api.send(Math.sin(args[0]).toString());
+				bot.send(Math.sin(args[0]).toString());
 			}else if(cmd === "cos"){
-				api.send(Math.cos(args[0]).toString());
+				bot.send(Math.cos(args[0]).toString());
 			}else if(cmd === "tan") {
-				api.send(Math.tan(args[0]).toString());
+				bot.send(Math.tan(args[0]).toString());
 			}
 		}
 	}
 
 	if(cmd === "pi"){
-		api.send(Math.PI.toString());
+		bot.send(Math.PI.toString());
 	}else if(cmd === "e"){
-		api.send(Math.E.toString());
+		bot.send(Math.E.toString());
 	}
 });
