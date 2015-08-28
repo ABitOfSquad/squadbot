@@ -106,13 +106,12 @@ function logged(err) {
         }
 
         wa.on("receivedMessage", function(message) {
-            console.log(message);
             if (message.from.split("@")[0] == settings["group_id"]) {
                 
                 if (message.body.substring(0, 1) == "!" || message.body.substring(0, 1) == "/") {
                     var parts = message.body.substring(1).split(" ");
                     
-                    bot.emit("command", parts[0].toLowerCase(), parts.slice(1))
+                    bot.emit("command", parts[0].toLowerCase(), parts.slice(1), message)
                 } else {
                     bot.emit("message", message.body, message);
                 }
@@ -121,9 +120,9 @@ function logged(err) {
                 if (message.body.substring(0, 1) == "!" || message.body.substring(0, 1) == "/") {
                     var parts = message.body.substring(1).split(" ");
                     
-                    bot.private.emit("command", parts[0].toLowerCase(), message.from, parts.slice(1))
+                    bot.private.emit("command", message.from, parts[0].toLowerCase(), parts.slice(1), message)
                 } else {
-                    bot.private.emit("message", message.body, message.from, message);
+                    bot.private.emit("message", message.from, message.body, message);
                 }
             }
             
