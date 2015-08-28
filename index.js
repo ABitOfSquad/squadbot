@@ -12,7 +12,6 @@ var typingTimeout
 var homegroup;
 
 global.settings;
-global.bot = new events.EventEmitter();
 global.print = function print(text, linebreak, format) {
     linebreak = typeof linebreak !== "undefined"? linebreak : true;
     format = typeof format !== "undefined" ? format : true;
@@ -32,6 +31,8 @@ global.print = function print(text, linebreak, format) {
     process.stdout.write(text + (linebreak ? "\n\r" : " "))
     hadLinebreak = linebreak
 };
+
+global.bot = new events.EventEmitter()
 
 /**
  * INITIALIZATION
@@ -154,7 +155,7 @@ function handleReceivedEvents(id, emitter, err, deleteTmp) {
     }
 }
 
-var sendMessage = function(msg) {
+bot.send = bot.sendMessage = function(msg) {
     emitter = new events.EventEmitter();
     
     try {
@@ -166,7 +167,7 @@ var sendMessage = function(msg) {
     return emitter
 };
 
-var sendImage = function(image, caption) {
+bot.sendImage = function(image, caption) {
     emitter = new events.EventEmitter();
     
     try {
@@ -201,7 +202,7 @@ var sendImage = function(image, caption) {
     return emitter
 };
 
-var sendContact = function(fields) {
+bot.sendContact = function(fields) {
     emitter = new events.EventEmitter();
     
     try {
@@ -242,7 +243,7 @@ var sendContact = function(fields) {
     return emitter
 };
 
-var sendTyping = function(duration) {
+bot.type = bot.sendTyping = function(duration) {
     wa.sendComposingState(settings["group_id"])
         
     typingTimeout = setTimeout(function() {
@@ -250,7 +251,7 @@ var sendTyping = function(duration) {
     }, duration)
 }
 
-var getMembers = function (callback) {
+bot.getMembers = function (callback) {
     wa.requestGroupInfo(settings["group_id"], function(err, group) {
         if (!err) {
             try {
@@ -262,40 +263,29 @@ var getMembers = function (callback) {
     });
 };
 
-function checkIfAdmin(callback) {
-    wa.requestGroupInfo(settings["group_id"], function(err, data) {
-        if (err) {
-            try {
-                callback(err, null)
-            } catch (err) {
-                console.log(err.stack);
-            }
-            return
-        }
-        
-        for (var i = 0; i < data.participants.length; i++) {
-            if (data.participants[i].jid.split("@")[0] == settings["telnumber"]) {
+bot.admin = {
+    "check": function checkIfAdmin(callback) {
+        wa.requestGroupInfo(settings["group_id"], function(err, data) {
+            if (err) {
                 try {
-                    callback(false, data.participants[i].admin)
+                    callback(err, null)
                 } catch (err) {
                     console.log(err.stack);
                 }
-                
-                console.log(data.participants[i]);
+                return
             }
-        }
-    })
-}
-
-global.api = {
-    "send": sendMessage,
-    "sendMessage": sendMessage, // Alias
-    "sendImage": sendImage,
-    "sendContact": sendContact,
-    "type": sendTyping,
-    "sendTyping": sendTyping, // Alias
-    "getMembers": getMembers,
-    "admin": {
-        "check": checkIfAdmin
+            
+            for (var i = 0; i < data.participants.length; i++) {
+                if (data.participants[i].jid.split("@")[0] == settings["telnumber"]) {
+                    try {
+                        callback(false, data.participants[i].admin)
+                    } catch (err) {
+                        console.log(err.stack);
+                    }
+                    
+                    console.log(data.participants[i]);
+                }
+            }
+        })
     }
-};
+}
