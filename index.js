@@ -22,8 +22,6 @@ global.print = function print(text) {
 global.bot = new events.EventEmitter()
 bot.setMaxListeners(250)
 
-globalPrivate.on("message", function() {console.log("sad");})
-
 bot.admin = {}
 bot.private = function(id) {
     var ob = {}
@@ -110,11 +108,30 @@ if (pluginList) {
         print("No plugins found")
     }
     else {
+        var reservedCommands = {}
+
         for (var i = 0; i < pluginList.length; i++) {
             print("Loading " + pluginList[i] + "...")
 
             try {
-                var plugin = require("./plugins/" + pluginList[i])
+                var plugin = require("./plugins/" + pluginList[i]).plugin
+                
+                if (!plugin) {
+                    print("Warning: plugin " + pluginList[i] + " does not implement exports.plugin")
+                }
+                else {
+                    if (plugin.reservedCommands) {
+                        for (var t = 0; t < plugin.reservedCommands.length; t++) {
+                            if (reservedCommands[plugin.reservedCommands[t]]) {
+                                print("Both " + pluginList[i] + " and " + reservedCommands[plugin.reservedCommands[t]] + " depend on the same command, please disable one of them.")
+                                process.exit();
+                            }
+                            else {
+                                reservedCommands[plugin.reservedCommands[t]] = pluginList[i]
+                            }
+                        }
+                    }
+                }
             } catch (err) {
                 print("Plugin " + pluginList[i] + " crashed with the following error:")
                 console.log(err.stack);
@@ -124,8 +141,6 @@ if (pluginList) {
 
     print("All plugins loaded")
 }
-
-print("Plugins loaded")
 
 var wa = whapi.createAdapter({
     msisdn: settings["telnumber"], // phone number with country code

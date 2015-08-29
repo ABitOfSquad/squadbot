@@ -1,3 +1,15 @@
+exports.plugin = {
+	"name" : "hangman",
+	"description" : "A clasic game of hangman",
+	"authors" : {
+		"Lem Severein" : "Creator"
+	},
+	"reservedCommands": ["hangman"],
+	"collaborators" : {},
+	"version" : "0.1.1",
+	"protocol" : "1"
+};
+
 var stagesOfHang = [
 	"|\n" +
 	"|\n" +

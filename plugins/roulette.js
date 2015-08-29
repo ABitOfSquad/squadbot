@@ -1,9 +1,10 @@
-var plugin = {
+exports.plugin = {
     "name" : "roulette",
     "description" : "A roulette plugin, that chooses a random unlucky one",
     "authors" : {
         "Lem Severein" : "Creator"
     },
+    "reservedCommands": ["roulette"],
     "collaborators" : {},
     "version" : "1.1",
     "protocol" : "1"

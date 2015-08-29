@@ -1,12 +1,13 @@
 var http = require("http");
 var https = require("https");
 
-var plugin = {
+exports.plugin = {
 	"name" : "misc",
 	"description" : "Lots of inside jokes, lots of crap",
 	"authors" : {
 		"Daniel Mizrachi" : "XD"
 	},
+	"reservedCommands": ["pirate", "yoda"],
 	"collaborators" : {},
 	"version" : "1",
 	"protocol" : "1"

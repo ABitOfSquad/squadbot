@@ -1,9 +1,10 @@
-var plugin = {
+exports.plugin = {
 	"name" : "geoguess",
 	"description" : "Guess where this picture is taken!",
 	"authors" : {
 		"Lem Severein" : "Creator"
 	},
+	"reservedCommands": ["geoguess"],
 	"collaborators" : {},
 	"version" : "0.1.1",
 	"protocol" : "1"

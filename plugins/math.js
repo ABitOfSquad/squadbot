@@ -1,4 +1,4 @@
-var plugin = {
+exports.plugin = {
 	"name" : "math",
 	"description" : "A compilation of several math functions",
 	"authors" : {

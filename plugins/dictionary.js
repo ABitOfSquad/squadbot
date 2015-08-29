@@ -1,9 +1,10 @@
-var plugin = {
+exports.plugin = {
     "name" : "dictionary",
     "description" : "The (urban)Dictionary command!",
     "authors" : {
         "Nick" : "Creator"
     },
+    "reservedCommands": ["define"],
     "collaborators" : {},
     "version" : "0.2",
     "protocol" : "1"

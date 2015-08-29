@@ -1,3 +1,7 @@
+exports.plugin = {
+	// "reservedCommands": ["hangman"]
+};
+
 bot.private().on("message", function(from, args, meta) {
 	bot.private(from).on("online", function() {console.log("online");})
 	bot.private(from).on("typing", function() {console.log("typing");})
