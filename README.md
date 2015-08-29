@@ -13,12 +13,25 @@ Squadbot requires a ```Settings.json``` file to work. This file needs to be crea
 ```
 
 #### Plugins
-Squadbot is made to be as easy as possible to use.  A plugin that simply sends all messages back can be only one line:
+Squadbot is made to be as easy as possible to use.  A plugin that simply sends all messages back can be only a few lines:
 
 **Heads Up! Significant changes are being made in this early stage of development, plugins are most likely to break sooner or later**
 ```javascript
+exports.plugin = {
+    "name" : "dictionary",
+    "description" : "The (urban)Dictionary command!",
+    "authors" : {
+        "Nick Vernij" : "Creator"
+    },
+    "reservedCommands": ["define"],
+    "collaborators" : {},
+    "version" : "0.2",
+    "protocol" : "1"
+};
+
 bot.on("message", function(msg, raw) {api.send("someone said: " + msg)})
 ```
+Everything is pretty straightforward, a better documentation can soon be found in our wiki.
 
 The only thing you need to do to load the plugin, is place it in the ```/plugins``` folder, Squadbot will do the rest.
 
