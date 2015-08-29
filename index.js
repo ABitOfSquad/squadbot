@@ -206,7 +206,7 @@ function logged(err) {
             if (from.split("@")[0] == settings["group_id"]) {
                 bot.emit(event, author)
             }
-            else {
+            else if (from.split("@")[1] != "g.us") {
                 globalPrivate.emit(event + ":" + from)
             }
         })

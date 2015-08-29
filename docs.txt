@@ -1,0 +1,33 @@
+bot:
+    emits:
+        "command" (command, agruments, meta) 
+        "message" (message, meta) 
+        "typing" (user) 
+        "stopedTyping" (user) 
+        "location" (location) 
+    
+    methods:
+        "sendMessage", "send" (message)
+        "sendImage" (image, caption)
+        "sendVideo" (video, caption)
+        "sendAudio" (audio)
+        "sendContact" (fields)
+        "sendTyping", "type" (duration)
+        "getMembers" (callback)
+
+bot.private: (id)
+    emits:
+        "command" (command, agruments, meta) 
+        "message" (message, meta) 
+        "typing" (user) 
+        "stopedTyping" (user) 
+        "online" () 
+        "offline" () 
+        
+    methods:
+        "sendMessage", "send" (message)
+        "sendImage" (image, caption)
+        "sendVideo" (video, caption)
+        "sendAudio" (audio)
+        "sendContact" (fields)
+        "sendTyping", "type" (duration)
