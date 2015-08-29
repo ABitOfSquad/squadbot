@@ -1,4 +1,4 @@
-exports.plugin = {
+var exports.plugin = {
 	"name" : "math",
 	"description" : "A compilation of several math functions",
 	"authors" : {
@@ -12,7 +12,7 @@ exports.plugin = {
 };
 
 // Evaluate equation in the form number[+|-|*|/|^|%]number
-bot.on("message",function(body,raw){
+bot.on("message",function(body){
 	if(/^[0-9]+(\+|-|\*|\/|\^|%)[0-9]+$/.test(body)){
 		ops = /[\+\-\*\/\^%]/;
 		nums = body.split(ops);
