@@ -10,10 +10,10 @@ exports.init = function(loadedSettings) {
     settings = loadedSettings
     
     wa = whapi.createAdapter({
-        msisdn: settings["telnumber"], // phone number with country code
-        username: settings["displayname"], // your name on WhatsApp
-        password: settings["whatsapp_pass"], // WhatsApp password
-        ccode: "44" // country code
+        msisdn: settings["whatsapp"]["telnumber"], // phone number with country code
+        username: settings["whatsapp"]["displayname"], // your name on WhatsApp
+        password: settings["whatsapp"]["whatsapp_pass"], // WhatsApp password
+        ccode: settings["whatsapp"]["telnumber"].substring(0, 1) // country code
     });
 
     wa.setMaxListeners(250)
@@ -39,7 +39,7 @@ function logged(err) {
             print('Name: ' + g.subject + ', Participants: ' + g.participants.length);
 
             //recognize main beta group
-            if(g.groupId == settings["group_id"]){
+            if(g.groupId == settings["whatsapp"]["group_id"]){
                 homegroup = g;
                 print("Found squadbot's home group");
             }
