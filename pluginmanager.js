@@ -24,7 +24,6 @@ function loadPlugins(){
             var reservedCommands = {}
 
             for (var i = 0; i < pluginList.length; i++) {
-                print("Loading " + pluginList[i] + "...")
 
                 try {
                     var plugin = require("./plugins/" + pluginList[i]).plugin
@@ -44,6 +43,8 @@ function loadPlugins(){
                                 }
                             }
                         }
+
+                        print("Loaded " + plugin["name"] + " v" + plugin["version"] + "!")
                     }
                 } catch (err) {
                     print("Plugin " + pluginList[i] + " crashed with the following error:", "red")

@@ -1,9 +1,12 @@
+var https = require("https");
+
 exports.plugin = {
 	"name" : "countdown",
 	"description" : "Choose a combination of nine random vowels or consonants and make your longest possible word out of them.",
 	"authors" : {
 		"Daniel Mizrachi" : "Creator"
 	},
+	"reservedCommands" : ["countdown"],
 	"collaborators" : {},
 	"version" : "0.1.0",
 	"protocol" : "1"
@@ -22,10 +25,9 @@ bot.on("command",function(cmd,args){
 	if(cmd === "countdown"){
 		if(playing){
 			bot.send("Oops, looks like somebody has already started a game of countdown!");
-		} else{
+		}else{
 			if(args.length > 8){
 				playing = true;
-				https = require("https");
 				var letters = {
 					"v":["a","e","i","o","u"],
 					"c":["b","c","d","f","g","h","j","k","l","m","n","p","q","r","s","t","v","w","x","y","z"]
@@ -35,12 +37,11 @@ bot.on("command",function(cmd,args){
 				if(args.every(function(val){
 					return val.toLowerCase() === "v" || val.toLowerCase() === "c";
 				})){
-					args.forEach(function(val,key) {
+					args.forEach(function(val,key){
 						val = val.toLowerCase();
 						selected.push(letters[val].random());
-					})
+					});
 				}
-
 
 				selectedStr = selected.join(" ").toUpperCase();
 				bot.send(":watch: Welcome to countdown! :watch:\n\nThe letters are:\n"+selectedStr+"\n\nMake the longest possible (English) word you can think of out of these letters.\n\nStarting in 3...");
@@ -120,22 +121,21 @@ bot.on("command",function(cmd,args){
 });
 
 bot.private().on("message",function(body,meta){
-	if(playing){
-		if(submitting){
-			if(submitted[meta.from])
-				bot.private(meta.from).send("Oops, you've already submitted a word!");
-			}else{
-				if(body.length > 1 && body.length < 10){
-					body = body.toUpperCase();
-					if(/^[A-Z]+$/.test(body)){
-						submitted[meta.notify] = body;
-						bot.private(meta.from).send("Thanks. Now return to the group chat to see the results!");
-					}else{
-						bot.private(meta.from).send("Oops, your word contains more than just letters. Quick, try again!");
-					}
+	if(playing && submitting){
+		if(submitted[meta.from]){
+			bot.private(meta.from).send("Oops, you've already submitted a word!");
+		}else{
+			if(body.length > 1 && body.length < 10){
+				body = body.toUpperCase();
+				if(/^[A-Z]+$/.test(body)){
+					submitted[meta.notify] = body;
+					bot.private(meta.from).send("Thanks. Now return to the group chat to see the results!");
 				}else{
-					bot.private(meta.from).send("Oops, your letter must be minimum 2 and maximum 9 letters long!");
+					bot.private(meta.from).send("Oops, your word contains more than just letters. Quick, try again!");
 				}
+			}else{
+				bot.private(meta.from).send("Oops, your letter must be minimum 2 and maximum 9 letters long!");
 			}
+		}
 	}
 });

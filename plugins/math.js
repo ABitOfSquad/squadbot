@@ -1,12 +1,13 @@
-var exports.plugin = {
+exports.plugin = {
 	"name" : "math",
-	"description" : "A compilation of several math functions",
+	"description" : "A compilation of several math functions, as well as generic equation parsing.",
 	"authors" : {
 		"Daniel Mizrachi" : "Creator"
 	},
 	"collaborators" : {
 		"Nick Vernij" : "minor bug fixes"
 	},
+	"reservedCommands" : ["rand","sqrt","squareroot","sin","cos","tan","pi","e"],
 	"version" : "0.1.1",
 	"protocol" : "1"
 };
