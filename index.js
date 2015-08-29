@@ -24,18 +24,33 @@ bot.setMaxListeners(250)
 
 globalPrivate.on("message", function() {console.log("sad");})
 
+bot.admin = {}
 bot.private = function(id) {
     var ob = {}
+    ob.sub = false
     
     ob.on = function(event, callback) {
-        console.log("asd");
-        console.log(callback);
-        if (!id) {
-            globalPrivate.on(event, function() {callback.apply(callback, arguments)})
-        }
-        else {
+        if (event == "online" || event == "online") {
+            if (!id) {
+                return
+            }
+            
+            if (!ob.sub) {
+                wa.sendPresenceSubscription(id)
+                ob.sub = true
+            }
+            
             globalPrivate.on(event + ":" + id, function() {callback.apply(callback, arguments)})
         }
+        else {
+            if (!id) {
+                globalPrivate.on(event, function() {callback.apply(callback, arguments)})
+            }
+            else {
+                globalPrivate.on(event + ":" + id, function() {callback.apply(callback, arguments)})
+            }
+        }
+        
     }
     
     ob.emit = function() {
@@ -60,6 +75,8 @@ bot.private = function(id) {
         ob.sendContact = function(fields) {bot.sendContact(fields, id)}
         ob.type = function(duration) {bot.sendTyping(duration, id)}
         ob.sendTyping = function(duration) {bot.sendTyping(duration, id)}
+        
+        
     }
     
     return ob
@@ -175,6 +192,23 @@ function logged(err) {
 
         wa.on("receivedLocation", function(loc) {
             bot.emit("location", loc)
+        })
+
+        wa.on("presence", function(pres) {
+            var event = pres.type == "available" ? "online" : "offline"
+            
+            globalPrivate.emit(event + ":" + pres.from)
+        })
+
+        wa.on("typing", function(type, from, author) {
+            var event = type == "composing" ? "typing" : "stopedTyping"
+            
+            if (from.split("@")[0] == settings["group_id"]) {
+                bot.emit(event, author)
+            }
+            else {
+                globalPrivate.emit(event + ":" + from)
+            }
         })
     });
 
