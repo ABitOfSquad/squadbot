@@ -1,4 +1,6 @@
 # whatsapi-Squadbot
+
+[![Join the chat at https://gitter.im/ABitOfSquad/whatsapi-Squadbot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ABitOfSquad/whatsapi-Squadbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A Bridge over the Node-whatsapi to run squadbot applications. The API we are using is our successor of the Node Whatsapi project, which got discontinued.
 
 #### Settings.json
