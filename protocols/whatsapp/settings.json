@@ -1,8 +1,8 @@
 {
     "telnumber" : "XXXXXX",
     "displayname" : "Squadbot",
-    "whatsapp_pass" : "XXXXXXX",
-    "group_id" : "XXXXXXX",
+    "whatsapp_pass" : "XXXXXX",
+    "group_id" : "XXXXXX",
 
     "connected_status" : "connected",
     "disconnected_status" : "disconnected",

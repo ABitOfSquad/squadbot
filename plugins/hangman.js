@@ -115,6 +115,7 @@ bot.on("command", function(cmd, args) {
 	
 	if (cmd == "hangman" && word == "") {
 		word = words[Math.floor(Math.random() * words.length)].toUpperCase()
+		console.log(word);
 		
 		bot.send("🎲 We're playing hangman! 🎮\n\nGuess a letter or whole word by using /guess.")
 		
@@ -129,39 +130,41 @@ bot.on("command", function(cmd, args) {
 			return
 		}
 		
-		if (args[0].length == 1 && letters.indexOf(args[0]) == -1) {
-			letters.push(args[0])
-			
-			if (word.indexOf(args[0]) == -1) {
-				errors++
-				bot.send(stagesOfHang[errors - 1])
+		if (args[0].length == 1) {
+			if (letters.indexOf(args[0]) == -1) {
+				letters.push(args[0])
 				
-				if (stagesOfHang.length == errors) {
-					setTimeout(function() {
-						bot.send('He\'s dead, thanks to you.\nThe word was "' + word.toLowerCase() + '"')
-					}, 200)
-					return reset()
+				if (word.indexOf(args[0]) == -1) {
+					errors++
+					bot.send(stagesOfHang[errors - 1])
+					
+					if (stagesOfHang.length == errors) {
+						setTimeout(function() {
+							bot.send('He\'s dead, thanks to you.\nThe word was "' + word.toLowerCase() + '"')
+						}, 200)
+						return reset()
+					}
 				}
-			}
-			else {
-				var complete = true
-				
-				for (var i = 0; i < word.length; i++) {
-					if (letters.indexOf(word[i]) == -1) {
-						complete = false
-						break
+				else {
+					var complete = true
+					
+					for (var i = 0; i < word.length; i++) {
+						if (letters.indexOf(word[i]) == -1) {
+							complete = false
+							break
+						}
+					}
+					
+					if (complete) {
+						bot.send('Congratulations, you\'ve saved him in time!\nThe word was "' + word.toLowerCase() + '"')
+						return reset()
 					}
 				}
 				
-				if (complete) {
-					bot.send('Congratulations, you\'ve saved him in time!\nThe word was "' + word.toLowerCase() + '"')
-					return reset()
-				}
+				setTimeout(function () {
+					sendStatus()
+				}, 200)
 			}
-			
-			setTimeout(function () {
-				sendStatus()
-			}, 200)
 		}
 		else {
 			if (args[0] == word) {

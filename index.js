@@ -59,7 +59,7 @@ if (protocolList.length == 0) {
 }
 
 if (process.argv[2]) {
-    if (protocolList.indexOf(process.argv[2])) {
+    if (protocolList.indexOf(process.argv[2]) != -1) {
         loadProtocol(process.argv[2])
     }
     else {
