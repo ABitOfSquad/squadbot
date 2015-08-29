@@ -7,6 +7,7 @@ var events = require("events");
 var pluginList;
 var typingTimeout
 var homegroup;
+var globalPrivate = new events.EventEmitter()
 
 global.settings;
 global.print = function print(text) {
@@ -19,8 +20,51 @@ global.print = function print(text) {
 }
 
 global.bot = new events.EventEmitter()
-bot.private = new events.EventEmitter()
 bot.setMaxListeners(250)
+
+globalPrivate.on("message", function() {console.log("sad");})
+
+bot.private = function(id) {
+    var ob = {}
+    
+    ob.on = function(event, callback) {
+        console.log("asd");
+        console.log(callback);
+        if (!id) {
+            globalPrivate.on(event, function() {callback.apply(callback, arguments)})
+        }
+        else {
+            globalPrivate.on(event + ":" + id, function() {callback.apply(callback, arguments)})
+        }
+    }
+    
+    ob.emit = function() {
+        if (!id) {
+            throw "Tried to emit to a private without an ID."
+        }
+        else {
+            globalPrivate.emit.apply(globalPrivate, arguments)
+            
+            arguments["0"] = arguments["0"] + ":" + id
+            globalPrivate.emit.apply(globalPrivate, arguments)
+            
+        }
+    }
+    
+    if (id) {
+        ob.send = function(msg) {bot.sendMessage(msg, id)}
+        ob.sendMessage = function(msg) {bot.sendMessage(msg, id)}
+        ob.sendImage = function(image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption, id)}
+        ob.sendVideo = function(video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption, id)}
+        ob.sendAudio = function(audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio", id)}
+        ob.sendContact = function(fields) {bot.sendContact(fields, id)}
+        ob.type = function(duration) {bot.sendTyping(duration, id)}
+        ob.sendTyping = function(duration) {bot.sendTyping(duration, id)}
+    }
+    
+    return ob
+}
+
 
 var emojis = JSON.parse(fs.readFileSync("emoji.json", "utf8"))
 
@@ -120,9 +164,9 @@ function logged(err) {
                 if (message.body.substring(0, 1) == "!" || message.body.substring(0, 1) == "/") {
                     var parts = message.body.substring(1).split(" ");
                     
-                    bot.private.emit("command", message.from, parts[0].toLowerCase(), parts.slice(1), message)
+                    bot.private(message.from).emit("command", message.from, parts[0].toLowerCase(), parts.slice(1), message)
                 } else {
-                    bot.private.emit("message", message.from, message.body, message);
+                    bot.private(message.from).emit("message", message.from, message.body, message);
                 }
             }
             
@@ -181,7 +225,6 @@ function handleReceivedEvents(id, emitter, err) {
     }, 900000); // Remove after 15 min to free memory
 }
 
-bot.private.send = bot.private.sendMessage = function(to, msg) {bot.sendMessage(msg, to)}
 bot.send = bot.sendMessage = function(msg, to) {
     emitter = new events.EventEmitter();
     
@@ -196,12 +239,8 @@ bot.send = bot.sendMessage = function(msg, to) {
     return emitter
 }
 
-// IT ALL MADE SENSE IN MY HEAD OKAY
-bot.private.sendImage = function(to, image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption, to)}
 bot.sendImage = function(image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption)}
-bot.private.sendVideo = function(to, video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption, to)}
 bot.sendVideo = function(video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption)}
-bot.private.sendAudio = function(to, audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio", to)}
 bot.sendAudio = function(audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio")}
 
 function sendMedia(location, mimes, suffix, type, caption, to) {
@@ -267,7 +306,6 @@ function sendMedia(location, mimes, suffix, type, caption, to) {
 }
 
 
-bot.private.sendContact = function(to, fields) {bot.sendContact(fields, to)}
 bot.sendContact = function(fields, to) {
     emitter = new events.EventEmitter();
     var to = to ? to : settings["group_id"]
@@ -310,7 +348,6 @@ bot.sendContact = function(fields, to) {
     return emitter
 };
 
-bot.private.type = bot.private.sendTyping = function(to, duration) {bot.sendTyping(duration, to)}
 bot.type = bot.sendTyping = function(duration, to) {
     var to = to ? to : settings["group_id"]
     wa.sendComposingState(to)
