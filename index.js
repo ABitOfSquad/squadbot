@@ -1,7 +1,6 @@
 var whapi = require("whatsapi");
 var fs = require("fs");
-var http = require("http")
-var stream = require("stream").Transform
+var request = require("request");
 var events = require("events");
 
 var pluginList;
@@ -17,6 +16,29 @@ global.print = function print(text) {
     var s = (d.getSeconds() < 10 ? "0" : "") + d.getSeconds()
 
     console.log("[" + h + ":" + m + ":" + s + "] " + text)
+}
+
+var emojis = JSON.parse(fs.readFileSync("emoji.json", "utf8"))
+
+try {
+    settings = JSON.parse(fs.readFileSync("settings.json", "utf8"))
+} 
+catch (err) {
+    print("Could not load settings file");
+    process.exit();
+}
+
+print("Settings loaded");
+
+if (process.argv[2]) {
+    switch (process.argv[2]) {
+        case "test":
+            
+            break;
+        default:
+            print('Unknown argument "' + process.argv[2] + '"')
+            process.exit()
+    }
 }
 
 global.bot = new events.EventEmitter()
@@ -79,19 +101,6 @@ bot.private = function(id) {
     
     return ob
 }
-
-
-var emojis = JSON.parse(fs.readFileSync("emoji.json", "utf8"))
-
-try {
-    settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'))
-} 
-catch (err) {
-    print("Could not load settings file");
-    process.exit();
-}
-
-print("Settings loaded");
 
 try {
     pluginList = fs.readdirSync("plugins")
@@ -206,7 +215,50 @@ function logged(err) {
         })
 
         wa.on("receivedLocation", function(loc) {
-            bot.emit("location", loc)
+            if (loc.from.split("@")[0] == settings["group_id"]) {
+                bot.emit("location", loc)
+            }
+            else if (loc.from.split("@")[1] != "g.us") {
+                globalPrivate.emit("location:" + from, loc)
+            }
+        })
+        
+        function getMedia(url, callback) {
+            request(url, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    var file = "./tmp/tmp-" + Math.round(Math.random() * 10000000)
+                            
+                    fs.writeFileSync(file, body)
+                    console.log(file);
+                }
+            })
+            // http.request(url, function(response) {
+            //     var data = new stream()
+            //     
+            //     response.on("data", function(chunk) {
+            //         data.push(chunk)
+            //     })
+            //     
+            //     response.on("error", function(err) {
+            //         throw "Error while downloading incoming media"
+            //     });
+            //     
+            //     response.on("end", function() {
+            //         var file = "./tmp/tmp-" + Math.round(Math.random() * 10000000) + "." + suffix
+            //         
+            //         fs.writeFileSync(file, data.read())
+            //         callback(file)
+            //     });
+            // }).end()
+        }
+        
+        wa.on("receivedImage", function(image) {
+            console.log(image);
+            if (image.from.split("@")[0] == settings["group_id"] || image.from.split("@")[1] != "g.us") {
+                getMedia(image.url, function(file) {
+                    console.log(file);
+                })
+            }
         })
 
         wa.on("presence", function(pres) {
