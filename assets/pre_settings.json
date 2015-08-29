@@ -1,0 +1,13 @@
+{
+  "debug" : true,
+  "max_event_listeners" : 250,
+
+  "protocol" : "whatsapp",
+
+  "whatsapp" : {
+    "telnumber" : "XXXXX",
+    "displayname" : "Squadbot",
+    "whatsapp_pass" : "XXXXXXXXXXXXXXXXXXXXXXXXXXX=",
+    "group_id" : "000000000-0000000000"
+  }
+}

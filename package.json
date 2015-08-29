@@ -1,7 +1,5 @@
 {
   "name": "whatsapi-squadbot",
   "version": "0.1.0",
-  "dependencies" : {
-    "ncurses" : "latest"
-  }
+  "dependencies" : { }
 }

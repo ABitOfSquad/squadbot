@@ -1,4 +1,4 @@
-var exports.plugin = {
+exports.plugin = {
 	"name" : "countdown",
 	"description" : "Choose a combination of nine random vowels or consonants and make your longest possible word out of them.",
 	"authors" : {
@@ -22,7 +22,7 @@ bot.on("command",function(cmd,args){
 	if(cmd === "countdown"){
 		if(playing){
 			bot.send("Oops, looks like somebody has already started a game of countdown!");
-		}else{
+		} else{
 			if(args.length > 8){
 				playing = true;
 				https = require("https");
@@ -35,11 +35,12 @@ bot.on("command",function(cmd,args){
 				if(args.every(function(val){
 					return val.toLowerCase() === "v" || val.toLowerCase() === "c";
 				})){
-					args.forEach(function(val,key){
+					args.forEach(function(val,key) {
 						val = val.toLowerCase();
 						selected.push(letters[val].random());
-					}
+					})
 				}
+
 
 				selectedStr = selected.join(" ").toUpperCase();
 				bot.send(":watch: Welcome to countdown! :watch:\n\nThe letters are:\n"+selectedStr+"\n\nMake the longest possible (English) word you can think of out of these letters.\n\nStarting in 3...");
@@ -136,6 +137,5 @@ bot.private().on("message",function(body,meta){
 					bot.private(meta.from).send("Oops, your letter must be minimum 2 and maximum 9 letters long!");
 				}
 			}
-		}
 	}
 });
