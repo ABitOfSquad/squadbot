@@ -18,7 +18,7 @@ bot.on("command", function(cmd, args){
             } else if(args[0] == "uptime") {
                 bot.send("Current bot uptime: " + getUptimeString())
             } else if(args[0] == "system"){
-                bot.send("Squadbot is currently running on a")
+                bot.send("Squadbot is currently running on a " + process.platform + " named " + process.env.USER)
             }
         }
     }

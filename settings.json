@@ -1,3 +1,5 @@
 {
-    "max_event_listeners": 250
+    "debug" : true,
+    "max_event_listeners" : 250,
+    "plugin_folder" : "plugins"
 }
