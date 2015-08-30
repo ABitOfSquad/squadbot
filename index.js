@@ -34,6 +34,7 @@ global.print = function print(text, color) {
     console.log(output);
 };
 
+
 /**
  * SETTINGS
  */
@@ -48,62 +49,7 @@ catch (err) {
     process.exit();
 }
 
-print("Settings loaded");
-
-/**
- * PROTOCOL
- */
-
-var protocolList;
-
-try {
-    protocolList = fs.readdirSync("protocols")
-} 
-catch (err) {
-    print("Could not load contents of protocols folder", "red");
-    process.exit();
-}
-
-if (protocolList.length == 0) {
-    print("Could not find a protocol", "red")
-    process.exit()
-}
-
-if (process.argv[2]) {
-    if (protocolList.indexOf(process.argv[2]) != -1) {
-        loadProtocol(process.argv[2])
-    }
-    else {
-        print('Unknown protocol "' + process.argv[2] + '"', "red")
-        process.exit()
-    }
-} else if(settings["protocol"]) {
-    if (protocolList.indexOf(settings["protocol"]) != -1) {
-        loadProtocol(settings["protocol"])
-    }
-    else {
-        print('Unknown protocol "' + process.argv[2] + '"', "red")
-        process.exit()
-    }
-} else {
-    print("Warning: No protocol given, using " + protocolList[0], "red")
-    loadProtocol(protocolList[0])
-}
-
-function loadProtocol(name) {
-    var protocol = require("./protocols/" + name + "/protocol.js")
-    
-    try {
-        protocol.init(settings)
-    } 
-    catch (err) {
-        protocol.init()
-    }
-    
-    print("Protocol loaded, loading plugins");
-}
-
-/**
- * PLUGINS
- */
-plugins.init(settings["plugin_folder"]);
+require("./spm.js").spm.on("done", function() {
+    console.log("done");
+    plugins.init(settings["plugin_folder"]);
+})
