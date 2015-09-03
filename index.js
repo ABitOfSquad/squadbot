@@ -4,10 +4,8 @@ var emoji = require("./emoji");
 var plugins = require("./pluginmanager");
 var homegroup;
 
-
-global.settings;
 global.bot = new events.EventEmitter()
-global.encodeEmoji = function(msg) { emoji.parse(msg) };
+global.encodeEmoji = function(msg) {return emoji.parse(msg) };
 
 /**
  * UTIL METHODS
@@ -40,7 +38,7 @@ global.print = function print(text, color) {
  */
 
 try {
-    settings = JSON.parse(fs.readFileSync("settings.json", "utf8"))
+    global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"))
 
     bot.setMaxListeners(settings["max_event_listeners"]);
 } 
@@ -49,7 +47,10 @@ catch (err) {
     process.exit();
 }
 
-require("./spm.js").spm.on("done", function() {
-    console.log("done");
+require("./spm.js")
+
+
+bot.on("loadingProtocolDone", function() {
+    print("Protocol loaded, loading plugins");
     plugins.init(settings["plugin_folder"]);
 })

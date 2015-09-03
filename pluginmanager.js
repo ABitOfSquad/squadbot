@@ -2,7 +2,7 @@ var fs = require("fs");
 
 var pluginlist;
 
-function init(folder){
+exports.init = function(folder){
     try {
         pluginList = fs.readdirSync(folder)
         loadPlugins();
@@ -43,8 +43,13 @@ function loadPlugins(){
                                 }
                             }
                         }
-
-                        print("Loaded " + plugin["name"] + " v" + plugin["version"] + "!")
+                        
+                        if (!plugin["name"]) {
+                            print("Loaded " + pluginList[i] + "!")
+                        }
+                        else {
+                            print("Loaded " + plugin["name"] + " v" + plugin["version"] + "!")
+                        }
                     }
                 } catch (err) {
                     print("Plugin " + pluginList[i] + " crashed with the following error:", "red")
@@ -55,8 +60,4 @@ function loadPlugins(){
 
         print("All plugins loaded")
     }
-}
-
-module.exports = {
-    "init" : function(folder) { init(folder) }
 }

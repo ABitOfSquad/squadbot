@@ -4,7 +4,7 @@ var net = require("net");
 
 exports.spm = new events.EventEmitter()
 
-if (process.argv[2]) {
+if (process.argv[2] && settings.spm.enabled) {
     switch (process.argv[2]) {
         case "install":
             if (process.argv[3] == "protocol" && process.argv[4]) {
@@ -17,7 +17,7 @@ if (process.argv[2]) {
                 
                 print("Connecting to server")
 
-                client.connect(4575, "localhost", function() {
+                client.connect(settings.spm.port, settings.spm.host, function() {
                 	print("Asking for a protocol called " + process.argv[4])
                 	client.write('{"type": "getProtocol", "name": "' + process.argv[4] + '"}');
                 });
@@ -59,7 +59,11 @@ if (process.argv[2]) {
             }
             break
         case "remove":
-            if (process.argv[3] == "protocol" && process.argv[4]) {
+            if (process.argv[3] == "protocol") {
+                if (!process.argv[4]) {
+                    print("Please provide a protocol to remove", "red")
+                }
+                
                 if (fs.readdirSync("protocols").indexOf(process.argv[4]) == -1) {
                     print("That protocol is not installed, can't remove nonexistent things", "red")
                     process.exit()
@@ -130,18 +134,18 @@ function useLocal() {
         loadProtocol(protocolList[0])
     }
 
-        function loadProtocol(name) {
-            var protocol = require("./protocols/" + name + "/protocol.js")
+    function loadProtocol(name) {
+        print("Loading protocol " + name);
+        
+        var protocol = require("./protocols/" + name + "/protocol.js")
+        
+        try {
+            var protSettings = JSON.parse(fs.readFileSync("protocols/" + name + "/settings.json", "utf8"))
             
-            try {
-                protocol.init(settings)
-            } 
-            catch (err) {
-                protocol.init()
-            }
-            
-            print("Protocol loaded, loading plugins");
-            
-            exports.spm.emit("done")
+            protocol.init(protSettings)
+        } 
+        catch (err) {
+            protocol.init()
         }
+    }
 }

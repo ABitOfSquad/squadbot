@@ -1,5 +1,11 @@
 {
     "debug" : true,
     "max_event_listeners" : 250,
-    "plugin_folder" : "plugins"
+    "plugin_folder" : "plugins",
+    
+    "spm": {
+        "host": "localhost",
+        "port": 4575,
+        "enabled": true
+    }
 }
