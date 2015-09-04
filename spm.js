@@ -136,16 +136,6 @@ function useLocal() {
 
     function loadProtocol(name) {
         print("Loading protocol " + name);
-        
-        var protocol = require("./protocols/" + name + "/protocol.js")
-        
-        try {
-            var protSettings = JSON.parse(fs.readFileSync("protocols/" + name + "/settings.json", "utf8"))
-            
-            protocol.init(protSettings)
-        } 
-        catch (err) {
-            protocol.init()
-        }
+        require("./protocolwraper.js")(name)
     }
 }
