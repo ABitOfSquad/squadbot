@@ -5,6 +5,7 @@ var fs = require("fs")
 
 var implements = {}
 var privateEmitters = {}
+var globalPrivate = new events.EventEmitter()
 
 global.protocol = new events.EventEmitter()
 
@@ -87,20 +88,27 @@ bot.getMembers = function(callback) {
 }
 
 protocol.on("message", function(from, body, meta) {
-    console.log("sn");
+    console.log(from);
+    console.log(body + "<_");
     if (body.substring(0, 1) == "!" || body.substring(0, 1) == "/") {
         var parts = body.substring(1).split(" ");
-        var payload = ["command", parts[0].toLowerCase(), parts.slice(1), meta]
+        var event = "command"
+        var arg1 = parts[0].toLowerCase()
+        var arg2 = parts.slice(1)
+        var arg3 = meta
     }
     else {
-        var payload = ["message", body, meta]
+        var event = "message"
+        var arg1 = body
+        var arg2 = meta
+        var arg3 = undefined
     }
     
     if (protocol.homeGroup == from) {
-        bot.emit.apply(this, payload)
+        bot.emit(event, arg1, arg2, arg3)
     }
     else if (privateEmitters[from]) {
-        privateEmitters[from].emit.apply(this, args.unshift(event))
+        privateEmitters[from].emit(event, arg1, arg2, arg3)
     }
 })
 
@@ -110,38 +118,107 @@ function passEvent(event, id, args) {
     }
     
     if (protocol.homeGroup == id) {
-        bot.emit.apply(this, args.unshift(event))
+        args.unshift(event)
+        bot.emit.apply(this, args)
     }
-    else if (privateEmitters[id]) {
-        privateEmitters[from].emit.apply(this, args.unshift(event))
+    else {
+        if (privateEmitters[id]) {
+            args.unshift(event)
+            privateEmitters[from].emit.apply(this, args)
+        }
+        
+        globalPrivate.emit.apply(this, args)
     }
 }
 
-
-protocol.on("online", function(id) {
-    passEvent("online", id)
-})
-
-protocol.on("offline", function(id) {
-    passEvent("offline", id)
-})
-
 protocol.on("typing", function(id, author) {
-    passEvent("typing", id, author)
+    passEvent("typing", id, [author])
 })
 
 protocol.on("stopedTyping", function(id, author) {
-    passEvent("stopedTyping", id, author)
+    passEvent("stopedTyping", id, [author])
+})
+
+protocol.on("image", function(id, image) {
+    passEvent("image", id, [image])
+})
+
+protocol.on("audio", function(id, audio) {
+    passEvent("audio", id, [audio])
+})
+
+protocol.on("video", function(id, video) {
+    passEvent("video", id, [video])
 })
 
 protocol.on("location", function(id, loc) {
-    passEvent("location", id, args)
+    passEvent("location", id, [loc])
 })
 
+function privateEmitter(id) {
+    function passEvent(event, args) {
+        if (!args) {
+            args = []
+        }
+        
+        emitter.apply(this, args)
+    }
+    
+    var emitter = new events.EventEmitter()
+    
+    emitter.on("typing", function(author) {
+        passEvent("typing", [author])
+    })
 
+    emitter.on("stopedTyping", function(author) {
+        passEvent("stopedTyping", [author])
+    })
 
-// do ti
+    emitter.on("image", function(image) {
+        passEvent("image", [image])
+    })
+
+    emitter.on("audio", function(audio) {
+        passEvent("audio", [audio])
+    })
+    
+    if (!implements.events.private.video) {
+        emitter.on("video", function(video) {
+            passEvent("video", [video])
+        })
+    }
+    
+    if (!implements.events.private.video) {
+        emitter.on("location", function(loc) {
+            passEvent("location", [loc])
+        })
+    }
+}
+
+protocol.private = function(id) {
+    if (id) {
+        if (!privateEmitters[id]) {
+            privateEmitters[id] = 
+        }
+        
+        var emitter = privateEmitters[id]
+    }
+    else {
+        var emitter = globalPrivate
+    }
+    
+    
+
+    
+    
+    return emitter
+}
+
 bot.private = function(id) {
+    if (!implements.functions.private) {
+        throw new Error("Plugin tried use the private() api, which is not available for this protocol.")
+    }
+
     if (id) {
         if (!privateEmitters[id]) {
             privateEmitters[id] = new events.EventEmitter()
@@ -150,7 +227,18 @@ bot.private = function(id) {
         var emitter = privateEmitters[id]
     }
     else {
-        var emitter = new events.EventEmitter()
+        var emitter = globalPrivate
+    }
+    
+    /// OLD ///////////////////////// OLD ////////////////////////// OLD ////////////////////////////////// OLD ///////////////////////////////
+    
+    function passCall(name, args) {
+        if (implements.functions[name]) {
+            return protocol[name].apply(this, args)
+        }
+        else {
+            throw new Error("Plugin tried to call the unimplemented protocol function " + name)
+        }
     }
     
     console.log(emitter);
@@ -198,6 +286,7 @@ bot.private = function(id) {
     }
     
     if (id) {
+
         ob.send = function(msg) {bot.sendMessage(msg, id)}
         ob.sendMessage = function(msg) {bot.sendMessage(msg, id)}
         ob.sendImage = function(image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption, id)}

@@ -5,6 +5,7 @@ var plugins = require("./pluginmanager");
 var homegroup;
 
 global.bot = new events.EventEmitter()
+
 global.encodeEmoji = function(msg) {return emoji.parse(msg) };
 
 /**

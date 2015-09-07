@@ -59,5 +59,19 @@ function loadPlugins(){
         }
 
         print("All plugins loaded")
+        
+        // Security measures 
+
+        bot.on("newListener", function(event, listener) {
+            var illegalListeners = ["newListener", "removeListener"]
+            
+            if (illegalListeners.indexOf(event) != -1) {
+                setTimeout(function () {
+                    bot.removeListener(event, listener)
+                }, 10);
+
+                print('Something tried to listen to the protected bot event "' + event + '"', "red")
+            }
+        })
     }
 }
