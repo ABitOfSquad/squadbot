@@ -156,15 +156,73 @@ protocol.on("location", function(id, loc) {
 })
 
 function privateEmitter(id) {
-    function passEvent(event, args) {
-        if (!args) {
-            args = []
+    var emitter = new events.EventEmitter()
+    
+    if (implements.functions.private.sendMessage) {
+        emitter.send = emitter.sendMessage = function(msg) {
+            emitter.in.sendMessage(msg)
         }
-        
-        emitter.apply(this, args)
+    }
+    else {
+        emitter.send = emitter.sendMessage = function() {
+            throw new Error("Plugin tried use the private().sendMessage api, which is not implemented in this protocol")
+        }
     }
     
-    var emitter = new events.EventEmitter()
+    if (implements.functions.private.sendImage) {
+        emitter.sendImage = function(image, caption) {
+            emitter.in.sendImage(image, caption)
+        }
+    }
+    else {
+        emitter.sendImage = function() {
+            throw new Error("Plugin tried use the private().sendImage api, which is not implemented in this protocol")
+        }
+    }
+    
+    if (implements.functions.private.sendVideo) {
+        emitter.sendVideo = function(video, caption) {
+            emitter.in.sendVideo(image, caption)
+        }
+    }
+    else {
+        emitter.sendVideo = function() {
+            throw new Error("Plugin tried use the private().sendVideo api, which is not implemented in this protocol")
+        }
+    }
+    
+    if (implements.functions.private.sendAudio) {
+        emitter.sendAudio = function(audio) {
+            emitter.in.sendAudio(audio)
+        }
+    }
+    else {
+        emitter.sendAudio = function() {
+            throw new Error("Plugin tried use the private().sendAudio api, which is not implemented in this protocol")
+        }
+    }
+    
+    if (implements.functions.private.sendContact) {
+        emitter.sendAudio = function(fields) {
+            emitter.in.sendContact(fields)
+        }
+    }
+    else {
+        emitter.sendContact = function() {
+            throw new Error("Plugin tried use the private().sendContact api, which is not implemented in this protocol")
+        }
+    }
+    
+    if (implements.functions.private.sendTyping) {
+        emitter.type = emitter.sendTyping = function(duration) {
+            emitter.in.sendTyping(duration)
+        }
+    }
+    else {
+        emitter.type = emitter.sendTyping = function() {
+            throw new Error("Plugin tried use the private().sendTyping api, which is not implemented in this protocol")
+        }
+    }
     
     emitter.on("typing", function(author) {
         passEvent("typing", [author])
@@ -198,7 +256,7 @@ function privateEmitter(id) {
 protocol.private = function(id) {
     if (id) {
         if (!privateEmitters[id]) {
-            privateEmitters[id] = 
+            privateEmitters[id] = new privateEmitter(id)
         }
         
         var emitter = privateEmitters[id]
@@ -206,10 +264,6 @@ protocol.private = function(id) {
     else {
         var emitter = globalPrivate
     }
-    
-    
-
-    
     
     return emitter
 }
@@ -221,82 +275,13 @@ bot.private = function(id) {
 
     if (id) {
         if (!privateEmitters[id]) {
-            privateEmitters[id] = new events.EventEmitter()
+            privateEmitters[id] = new privateEmitter(id)
         }
         
         var emitter = privateEmitters[id]
     }
     else {
         var emitter = globalPrivate
-    }
-    
-    /// OLD ///////////////////////// OLD ////////////////////////// OLD ////////////////////////////////// OLD ///////////////////////////////
-    
-    function passCall(name, args) {
-        if (implements.functions[name]) {
-            return protocol[name].apply(this, args)
-        }
-        else {
-            throw new Error("Plugin tried to call the unimplemented protocol function " + name)
-        }
-    }
-    
-    console.log(emitter);
-    
-    emitter.on("hai")
-    
-    var ob = {}
-    ob.sub = false
-    
-    ob.on = function(event, callback) {
-        if (event == "online" || event == "online") {
-            if (!id) {
-                return
-            }
-            
-            if (!ob.sub) {
-                wa.sendPresenceSubscription(id)
-                ob.sub = true
-            }
-            
-            globalPrivate.on(event + ":" + id, function() {callback.apply(callback, arguments)})
-        }
-        else {
-            if (!id) {
-                globalPrivate.on(event, function() {callback.apply(callback, arguments)})
-            }
-            else {
-                globalPrivate.on(event + ":" + id, function() {callback.apply(callback, arguments)})
-            }
-        }
-        
-    }
-    
-    ob.emit = function() {
-        if (!id) {
-            throw "Tried to emit to a private without an ID."
-        }
-        else {
-            globalPrivate.emit.apply(globalPrivate, arguments)
-            
-            arguments["0"] = arguments["0"] + ":" + id
-            globalPrivate.emit.apply(globalPrivate, arguments)
-            
-        }
-    }
-    
-    if (id) {
-
-        ob.send = function(msg) {bot.sendMessage(msg, id)}
-        ob.sendMessage = function(msg) {bot.sendMessage(msg, id)}
-        ob.sendImage = function(image, caption) {return sendMedia(image, ["image/jpeg", "image/png"], "png", "sendImage", caption, id)}
-        ob.sendVideo = function(video, caption) {return sendMedia(video, ["video/mp4"], "mp4", "sendVideo", caption, id)}
-        ob.sendAudio = function(audio) {return sendMedia(audio, ["audio/mpeg", "audio/x-wav"], "mp3", "sendAudio", id)}
-        ob.sendContact = function(fields) {bot.sendContact(fields, id)}
-        ob.type = function(duration) {bot.sendTyping(duration, id)}
-        ob.sendTyping = function(duration) {bot.sendTyping(duration, id)}
-        
-        
     }
     
     return emitter

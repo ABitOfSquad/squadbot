@@ -1,0 +1,41 @@
+{
+	"functions": {
+		"sendMessage": false,
+		"sendImage": false,
+		"sendVideo": false,
+		"sendAudio": false,
+		"sendContact": false,
+		"sendTyping": false,
+		
+		"getMembers": false,
+		
+		"private": {
+			"sendMessage": false,
+			"sendImage": false,
+			"sendVideo": false,
+			"sendAudio": false,
+			"sendContact": false,
+			"sendTyping": false
+		}
+	},
+	
+	"events": {
+		"message": false,
+		"typing": false,
+		"stopedTyping": false,
+		"image": false,
+		"audio": false,
+		"video": false,
+		"location": false,
+		
+		"private": {
+			"message": false,
+			"typing": false,
+			"stopedTyping": false,
+			"image": false,
+			"audio": false,
+			"video": false,
+			"location": false
+		}
+	}
+}
