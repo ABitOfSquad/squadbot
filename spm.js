@@ -136,6 +136,6 @@ function useLocal() {
 
     function loadProtocol(name) {
         print("Loading protocol " + name);
-        require("./protocolwraper.js")(name)
+        require("./protocolwrapper.js")(name)
     }
 }
