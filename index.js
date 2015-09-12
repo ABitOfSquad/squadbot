@@ -2,16 +2,23 @@ var fs = require("fs");
 var events = require("events");
 var emoji = require("./emoji");
 var plugins = require("./pluginmanager");
-var homegroup;
 
 global.bot = new events.EventEmitter()
 
+/**
+ * parses emoji strings to unicode characters
+ *
+ * @param msg stringe to parse emojis from
+ * @returns msg string with emoji unicode chars
+ */
 global.encodeEmoji = function(msg) {return emoji.parse(msg) };
 
 /**
- * UTIL METHODS
+ * Prints a fancier line to the console
+ *
+ * @param text
+ * @param color
  */
-
 global.print = function print(text, color) {
     var output = ""
     
@@ -35,9 +42,8 @@ global.print = function print(text, color) {
 
 
 /**
- * SETTINGS
+ * SETTINGS (initializes settings.json)
  */
-
 try {
     global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"))
 
@@ -48,10 +54,13 @@ catch (err) {
     process.exit();
 }
 
-require("./spm.js")
+require("./spm.js");
 
-
+/**
+ * Fired when the protocol is done loading
+ */
 bot.on("loadingProtocolDone", function() {
     print("Protocol loaded, loading plugins");
+    //lets start the pluginmanager
     plugins.init(settings["plugin_folder"]);
 })

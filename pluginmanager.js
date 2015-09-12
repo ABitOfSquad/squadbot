@@ -2,6 +2,11 @@ var fs = require("fs");
 
 var pluginlist;
 
+/**
+ * Initializes the plugins folder, folder as given in the settings
+ *
+ * @param folder path of the folder that contains plugins
+ */
 exports.init = function(folder){
     try {
         pluginList = fs.readdirSync(folder)
@@ -15,6 +20,9 @@ exports.init = function(folder){
     }
 }
 
+/**
+ * Loads the plugns from the plugin list generated on initialization
+ */
 function loadPlugins(){
     if (pluginList) {
         if (pluginList.length == 0) {
@@ -23,15 +31,30 @@ function loadPlugins(){
         else {
             var reservedCommands = {}
 
+            //creates a listener for the bot emitter to check for illegal listeners
+            bot.on("newListener", function(event, listener) {
+                var illegalListeners = ["newListener", "removeListener"]
+
+                if (illegalListeners.indexOf(event) != -1) {
+                    setTimeout(function () {
+                        bot.removeListener(event, listener)
+                    }, 10);
+
+                    print('Something tried to listen to the protected bot event "' + event + '"', "red")
+                }
+            })
+
             for (var i = 0; i < pluginList.length; i++) {
 
                 try {
                     var plugin = require("./plugins/" + pluginList[i]).plugin
 
+                    //does the plugin has a exports.plugins?
                     if (!plugin) {
                         print("Warning: plugin " + pluginList[i] + " does not implement exports.plugin", "red")
                     }
                     else {
+                        //do some fancy commands checking
                         if (plugin.reservedCommands) {
                             for (var t = 0; t < plugin.reservedCommands.length; t++) {
                                 if (reservedCommands[plugin.reservedCommands[t]]) {
@@ -60,18 +83,6 @@ function loadPlugins(){
 
         print("All plugins loaded")
         
-        // Security measures 
-
-        bot.on("newListener", function(event, listener) {
-            var illegalListeners = ["newListener", "removeListener"]
-            
-            if (illegalListeners.indexOf(event) != -1) {
-                setTimeout(function () {
-                    bot.removeListener(event, listener)
-                }, 10);
-
-                print('Something tried to listen to the protected bot event "' + event + '"', "red")
-            }
-        })
+        // Security measures
     }
 }

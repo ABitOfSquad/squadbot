@@ -9,6 +9,10 @@ var globalPrivate = new events.EventEmitter()
 
 global.protocol = new events.EventEmitter()
 
+/**
+ * Creates a new wrapper for a protocol
+ * @param name name of the protocol
+ */
 module.exports = function(name) {
     try {
         implements = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"))
@@ -22,10 +26,6 @@ module.exports = function(name) {
         print("Protocol does not have a valid mplements.json file", "red")
         process.exit()
     }
-    
-    
-
-
 
     var protocol = require("./protocols/" + name + "/protocol.js")
 
@@ -50,6 +50,13 @@ module.exports = function(name) {
     protocol.init(protSettings)
 }
 
+/**
+ * calls the function in the protocol that's being used
+ *
+ * @param name name of the protocol
+ * @param args args of the function
+ * @returns {*}
+ */
 function passCall(name, args) {
     if (implements.functions[name]) {
         return protocol[name].apply(this, args)
@@ -58,6 +65,11 @@ function passCall(name, args) {
         throw new Error("Plugin tried to call the unimplemented protocol function " + name)
     }
 }
+
+/**
+ * API functions
+ * @type {Function}
+ */
 
 bot.send = bot.sendMessage = function(msg) {
     return passCall("sendMessage", [msg])
@@ -87,6 +99,9 @@ bot.getMembers = function(callback) {
     return passCall("getMembers", [callback])
 }
 
+/**
+ * Creates an object from a new message
+ */
 protocol.on("message", function(from, body, meta) {
     console.log(from);
     console.log(body + "<_");
@@ -112,6 +127,12 @@ protocol.on("message", function(from, body, meta) {
     }
 })
 
+/**
+ * Passes events to the API emitter
+ * @param event
+ * @param id
+ * @param args
+ */
 function passEvent(event, id, args) {
     if (!args) {
         args = []
@@ -130,6 +151,10 @@ function passEvent(event, id, args) {
         globalPrivate.emit.apply(this, args)
     }
 }
+
+/**
+ * Emits all the events
+ */
 
 protocol.on("typing", function(id, author) {
     passEvent("typing", id, [author])
@@ -155,6 +180,10 @@ protocol.on("location", function(id, loc) {
     passEvent("location", id, [loc])
 })
 
+/**
+ * Handling events and calls using private messaging
+ * @param id
+ */
 function privateEmitter(id) {
     var emitter = new events.EventEmitter()
     

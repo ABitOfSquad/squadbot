@@ -97,6 +97,9 @@ else {
     useLocal()
 }
 
+/**
+ * Loads locally installed protocols
+ */
 function useLocal() {
     var protocolList;
 
