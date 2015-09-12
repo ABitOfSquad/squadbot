@@ -1,28 +1,33 @@
 # Squadbot
+[![Join the chat at https://gitter.im/ABitOfSquad/whatsapi-Squadbot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ABitOfSquad/whatsapi-Squadbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 **Heads up! THIS PROJECT IS WORKING AND BREAKING PRETTY MUCH EVERY DAY AT THIS POINT, SO DON'T EXPECT A STABLE VERSION FOR A WHILE.**
 
 
-[![Join the chat at https://gitter.im/ABitOfSquad/whatsapi-Squadbot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ABitOfSquad/whatsapi-Squadbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A bridge over the Node-whatsapi to run 'Squadbot' applications. The API we are using is our successor of the Node Whatsapi project, which got discontinued.
 
 #### What is Squadbot?
 
-@Nickforall pls...
+Squadbot is an advanced plugin API, written for chat bots. With the ability to write your own protocols and plugin, you can make the bot you want fairly easy. And if you aren't a programmer, you can still setup squadbot fairly easy. With our own package manager (soon te be introduced and online), you can add different protocols and plugins with a single command. But the core of squadbot can be used for much more than only chat bots. We are working on a secure plugin system, and with slight modificiations, squadbot can be used for everything that requires plugin management. There have been ideas around in the team about a siri-like home assistent, and even a flexible home security system, that could been made possible with small modifications to the protocol. For any questions, feel free to e-mail us at ```abitofsquad@nickforall.nl``` and we will be happy to answer all your questions. **Happy Coding!**
 
 #### Settings.json
-Squadbot requires a ```settings.json``` file in its root directory (the same as ```index.js```) in order to work. The object within the file must have the following properties:
+Squadbot requires a ```settings.json``` file in its root directory (the same as ```index.js```) in order to work. The object within the file must have the following properties, in order for the bot to work. Protocols also have their own settings, these will be downloaded when installing a new protocol:
 ```json
 {
-  "telnumber" : "",
-  "displayname" : "Squadbot",
-  "whatsapp_pass" : "XXXXXXXXXXX",
-  "group_id" : "0"
+    "debug" : true,
+    "max_event_listeners" : 250,
+    "plugin_folder" : "plugins",
+    
+    "spm": {
+        "host": "localhost",
+        "port": 4575,
+        "enabled": true
+    }
 }
 ```
-More information on how to extract passwords can be found [here](https://github.com/ABitOfSquad/WA-password/).
 
 #### Plugins
-Squadbot plugins are very easy to write. Below is an example which uses the event-driven plugins API provided:
+Squadbot plugins are very easy to write. Below is quite an advanced, yet a small example which uses the event-driven plugins API provided:
 
 ```javascript
 exports.plugin = {
@@ -67,7 +72,7 @@ bot.on("command", function(cmd, args, sender) {
 A better documentation for this API is to be written. For now, if you want some more complex examples, feel free to take a look in the ```/plugins``` directory in this repo. Every ```.js``` file placed in here which defines a valid ```exports.plugin``` object is automatically loaded by Squadbot upon initialisation.
 
 #### Contributing
-Feel free to contribute, however significant API changes have a chance of not being accepted, since we like to design the API with our full team. If you've written a plugin for Squadbot, awesome! However public contributions are not accepted in this repository, but please do add it to your own repo and let us know about it! We're interested to see what people might come up with, even at such an early stage in development.
+Feel free to contribute, however significant API changes have a chance of not being accepted, since we like to design the API with our full team. If you've written a plugin for Squadbot, awesome! However public contributions are not directly accepted in this repository, but please make a pull request as a proposal for what you want to implement, if the team agrees with it, you'll be able to code it, and the team will be helping you as much as they can! We're interested to see what people might come up with, even at such an early stage in development.
 An npm-like *SPM*\* is currently being developed, but this will take a while to get into production. For now, we're focused on other things and at some point will compile a list somewhere of available plugins and their associative protocols. Speaking of which...
 
 #### Cross Protocol
