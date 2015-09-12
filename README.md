@@ -40,26 +40,25 @@ exports.plugin = {
     "collaborators": {
         "Nick Vernij": "Made the older versions (except not really)"
     },
-    "version": "0.3",
-    "protocol": "1"
+    "version": "0.3"
 };
 
 bot.on("message", function(msg, sender) {
     msg = msg.toLowerCase();
     if(msg === "squadbot") {
         bot.send("You called?");
-    }else if(msg === "batman") {
+    } else if(msg === "batman") {
         bot.send("You called for Batman but I'm the next best thing!");
     }
 });
 
 bot.on("command", function(cmd, args, sender) {
-    if(cmd === "count" && args.length === 2){
-        if(args[0] < args[1]){
-            for(var i = parseInt(args[0])-1; i < parseInt(args[1]); i++){
+    if(cmd === "count" && args.length === 2) {
+        if(args[0] < args[1]) {
+            for(var i = parseInt(args[0])-1; i < parseInt(args[1]); i++) {
                 bot.send(i+1);
             }
-        }else{
+        } else {
             for(var i = parseInt(args[0])+1; i > parseInt(args[1]); i--){
                 bot.send(i-1);
             }
