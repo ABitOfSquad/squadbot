@@ -35,3 +35,6 @@ tmp/*
 # Will now be downloaded by spm
 protocols/*
 plugins/*
+
+# Data files
+spm/dependencyusers.json
