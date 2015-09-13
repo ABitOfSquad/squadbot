@@ -11,7 +11,7 @@ function listen(){
     process.stdin.setEncoding('utf8');
 
     process.stdin.on('data', function (text) {
-        text = text.trim();
+        text = text.trim().toLowerCase();
         var parts = text.split(" ");
         var name = parts[0];
         var args = parts.slice(1);
@@ -27,6 +27,7 @@ function listen(){
  */
 function askProtocol(empty){
     if(empty){
+        print("Connecting with SPM to get a list of the available official protocols");
         spmProtocolRequest()
     } else {
         var protocolList;
@@ -47,6 +48,10 @@ function askProtocol(empty){
  */
 function spmProtocolRequest(){
     var officialProtocols = [];
+    //DEBUG
+    officialProtocols.push("demo");
+    logProtocols(officialProtocols, false);
+    //END DEBUG
 }
 
 /**
@@ -58,7 +63,7 @@ function spmProtocolRequest(){
 function logProtocols(arr, local){
     if(arr) {
         if(arr.length == 0) {
-            print("Could not select and/or download the given protocol", "red");
+            print("Fatal error, either SPM did not respond, or protocols folder could not be read", "red");
             process.exit(1);
         }
     }
@@ -69,9 +74,9 @@ function logProtocols(arr, local){
         });
 
         if(local){
-            print("Protocol can be selected using the command \"spm select -p name\"")
+            print("Protocol can be selected using the command \"spm select -proto name\"")
         } else {
-            print("Protocol can be selected using the command \"spm install -p name\"")
+            print("Protocol can be selected using the command \"spm install -proto name\"")
         }
 
     } catch(err) {

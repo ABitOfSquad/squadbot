@@ -1,15 +1,17 @@
 var fs = require("fs");
 var events = require("events");
 var net = require("net");
+var terminalhandle = require("./terminalhandler");
+
+var protocolIsLoaded;
+var isCommandListening;
+var isInitializing;
 
 exports.spm = new events.EventEmitter();
+exports.initProtocols = function() { initProtocolLoading()};
 exports.loadProtocol = function(name) { loadProtocol(name)};
 
-function loadProtocol(name) {
-    print("Loading protocol " + name);
-    //require("./protocolwrapper.js")(name);
-}
-
+/**
 if (process.argv[2] && settings.spm.enabled) {
     switch (process.argv[2]) {
         case "install":
@@ -105,7 +107,7 @@ else {
 
 /**
  * Loads locally installed protocols
- */
+ *
 function useLocal() {
     var protocolList;
 
@@ -134,5 +136,134 @@ function useLocal() {
         print("Warning: No protocol given, using " + protocolList[0], "red")
         loadProtocol(protocolList[0])
     }
+}**/
+
+/**
+ *
+ * @param name
+ */
+function loadProtocol(name) {
+    if(!protocolIsLoaded){
+        print("Loading protocol " + name);
+        require("./protocolwrapper.js")(name);
+        protocolIsLoaded = true;
+    }
+}
+
+/**
+ * Initializes the loading of the protocol
+ */
+function initProtocolLoading(){
+    initTerminalCommands();
+    print("SPM commands in console enabled", "cyan");
+
+    try {
+        if(settings["protocol"] !== undefined || settings["protocol"] == ""){
+            if(!fs.existsSync("./protocols/" + settings["protocol"] + "/")) {
+                print("gven protocol not installed", "red");
+
+                isInitializing = true;
+                print("Protocol defined in settings is not downloaded", "red");
+                if(fs.readdirSync("protocols").length == 0){
+                    terminalhandle.askProtocol(true);
+                } else {
+                    terminalhandle.askProtocol(false);
+                }
+            } else {
+                loadProtocol(settings["protocol"])
+            }
+        } else {
+            print("Protocol not defined in settings, assuming a new installation is being used");
+            isInitializing = true;
+            terminalhandle.askProtocol(true);
+        }
+    } catch(err) {
+
+    }
+}
+
+/**
+ * (re)sets the protocol that is being used, in the settings file.
+ *
+ * @param name Name of the new protocol.
+ */
+function setProtocol(name) {
+    try {
+        var _settings = JSON.parse(fs.readFileSync("settings.json", "utf8"));
+        _settings["protocol"] = name;
+
+        try {
+            fs.writeFileSync('./settings.json', JSON.stringify(_settings, null, 4));
+        } catch(err) {
+            print("Could not save new settings, please change the protocol variable manually.")
+        }
+
+        if (!protocolIsLoaded) {
+            settings["protocol"] = name;
+            loadProtocol(name);
+        }
+    } catch(err) {
+        print("could not change protocol in settings.json, please change the protocol variable manually.")
+    }
+}
+
+/**
+ * Starts listening for spm commands
+ */
+function initTerminalCommands(){
+    terminal.on("command", function(name, args){
+        if(name === "spm") {
+
+            switch(args[0]){
+                case "select":
+                    if(args[1] == "-proto"){
+                        if(args[2] !== undefined){
+                            setProtocol(args[2])
+                        } else {
+                            print("[SPM] Missing command arguments", "red");
+                        }
+                    } else {
+                        print("[SPM] Can only select protocol, please indicate that the string is a protocol by using '-proto ' in front of the protocol name", "red");
+                    }
+
+                    break;
+                case "install":
+                    if(args[1] == "-proto"){
+                        if(args[2] !== undefined){
+                            installProtocol(args[2])
+                        } else {
+                            print("[SPM] Missing command arguments", "red");
+                        }
+                    } else if(args[1] !== undefined && args.length < 2) {
+                        installPlugin(args[1]);
+                    } else {
+                        print("[SPM] Missing command arguments", "red");
+                    }
+
+                    break;
+                default:
+                    print("[SPM] Missing command arguments", "red");
+            }
+
+        }
+
+    });
+
+    isCommandListening = true;
+}
+
+/**
+ * Downloads a protocol to the protocols folder
+ * @param name
+ */
+function installProtocol(name){
+
+}
+
+/**
+ * Downloads a plugin to the plugins folder
+ * @param name
+ */
+function installPlugin(name){
 
 }

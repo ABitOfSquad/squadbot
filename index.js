@@ -2,7 +2,8 @@ var fs = require("fs");
 var events = require("events");
 var emoji = require("./emoji");
 var plugins = require("./pluginmanager");
-var terminalhandler = require("./terminalhandler")
+var terminalhandler = require("./terminalhandler");
+var spm = require("./spm.js");
 
 global.bot = new events.EventEmitter();
 global.terminal = new events.EventEmitter();
@@ -90,7 +91,8 @@ global.print = function print(text, color, style) {
  * SETTINGS (initializes settings.json)
  */
 try {
-    global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"))
+    global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"));
+    print("Settings.json successfully loaded into memory!");
 
     bot.setMaxListeners(settings["max_event_listeners"]);
 } 
@@ -99,7 +101,7 @@ catch (err) {
     process.exit();
 }
 
-require("./spm.js");
+spm.initProtocols();
 
 /**
  * Fired when the protocol is done loading
