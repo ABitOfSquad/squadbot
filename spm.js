@@ -116,15 +116,7 @@ function useLocal() {
         process.exit()
     }
 
-    if (process.argv[2]) {
-        if (protocolList.indexOf(process.argv[2]) != -1) {
-            loadProtocol(process.argv[2])
-        }
-        else {
-            print('Unknown protocol "' + process.argv[2] + '"', "red")
-            process.exit()
-        }
-    } else if (settings["protocol"]) {
+    if (settings["protocol"]) {
         if (protocolList.indexOf(settings["protocol"]) != -1) {
             loadProtocol(settings["protocol"])
         }
