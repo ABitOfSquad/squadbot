@@ -24,11 +24,38 @@ global.encodeEmoji = function(msg) {return emoji.parse(msg) };
  * @param text
  * @param color
  */
-global.print = function print(text, color) {
-    var output = ""
+global.print = function print(text, color, style) {
+    var colors =  {
+        "black": '30m', // Should probably not be used
+        "red": '31m',
+        "green": '32m',
+        "brown": '33m',
+        "blue": '34m',
+        "purple": '35m',
+        "cyan": '36m',
+        "gray": '37m',
+        "white": '0m'
+    }
+    
+    var styles = {
+        "bold": "1;",
+        "lighter": "2;",
+        "italic": "3;",
+        "underline": "4;"
+    }
+    
+    var output = '\033[0m' // Clear all previous colors (just in case)
     
     if (color) {
-        output += '\033[31m'
+        if (colors[color]) {
+            var styleCode = ""
+            
+            if (styles[style]) {
+                styleCode = styles[style]
+            }
+            
+            output += '\033[' + styleCode + colors[color]
+        }
     }
     
     var d = new Date()
@@ -44,6 +71,19 @@ global.print = function print(text, color) {
     
     console.log(output);
 };
+
+// Uncomment for color demo
+
+// print("black", "black")
+// print("red", "red", "bold")
+// print("green", "green", "lighter")
+// print("brown", "brown", "italic")
+// print("blue", "blue", "underline")
+// print("purple", "purple")
+// print("cyan", "cyan")
+// print("gray", "gray")
+// print("normal")
+// process.exit();
 
 
 /**
