@@ -2,8 +2,13 @@ var fs = require("fs");
 var events = require("events");
 var emoji = require("./emoji");
 var plugins = require("./pluginmanager");
+var terminalhandler = require("./terminalhandler")
 
-global.bot = new events.EventEmitter()
+global.bot = new events.EventEmitter();
+global.terminal = new events.EventEmitter();
+
+// Now listening for console input
+terminalhandler.listen();
 
 /**
  * parses emoji strings to unicode characters

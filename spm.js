@@ -2,7 +2,13 @@ var fs = require("fs");
 var events = require("events");
 var net = require("net");
 
-exports.spm = new events.EventEmitter()
+exports.spm = new events.EventEmitter();
+exports.loadProtocol = function(name) { loadProtocol(name)};
+
+function loadProtocol(name) {
+    print("Loading protocol " + name);
+    //require("./protocolwrapper.js")(name);
+}
 
 if (process.argv[2] && settings.spm.enabled) {
     switch (process.argv[2]) {
@@ -129,8 +135,4 @@ function useLocal() {
         loadProtocol(protocolList[0])
     }
 
-    function loadProtocol(name) {
-        print("Loading protocol " + name);
-        require("./protocolwrapper.js")(name)
-    }
 }
