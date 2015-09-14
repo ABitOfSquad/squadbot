@@ -8,10 +8,11 @@ A bridge over the Node-whatsapi to run 'Squadbot' applications. The API we are u
 
 #### What is Squadbot?
 
-Squadbot is an advanced plugin API, written for chat bots. With the ability to write your own protocols and plugin, you can make the bot you want fairly easy. And if you aren't a programmer, you can still setup squadbot fairly easy. With our own package manager (soon te be introduced and online), you can add different protocols and plugins with a single command. But the core of squadbot can be used for much more than only chat bots. We are working on a secure plugin system, and with slight modificiations, squadbot can be used for everything that requires plugin management. There have been ideas around in the team about a siri-like home assistent, and even a flexible home security system, that could been made possible with small modifications to the protocol. For any questions, feel free to e-mail us at ```abitofsquad@nickforall.nl``` and we will be happy to answer all your questions. **Happy Coding!**
+Squadbot is an advanced plugin API written for chat bots. With the ability to write your own protocols and plugins, you can fairly easily augment the bot in whatever way best suits you. And if you aren't a programmer, Squadbot is a piece of cake to install and set up. With our own package manager (soon to be introduced), you can add different protocols and plugins with a single command. But the core of Squadbot can be used for much more than only chat bots. We are working on a secure plugin system so that with slight modifications, Squadbot can be used for everything that requires plugin management. There have been ideas popping up in the team about a Siri-like home assistant, and even a flexible home security system that could be made possible with small modifications to the protocol.
+For any questions, feel free to e-mail us at [abitofsquad@nickforall.nl](mailto:abitofsquad@nickforall.nl) and we will be happy to answer all your questions. **Happy Coding!**
 
 #### Settings.json
-Squadbot requires a ```settings.json``` file in its root directory (the same as ```index.js```) in order to work. The object within the file must have the following properties, in order for the bot to work. Protocols also have their own settings, these will be downloaded when installing a new protocol:
+Squadbot requires a ```settings.json``` file in its root directory (the same as ```index.js```) in order to work. The object within the file must have the following properties in order for the bot to work:
 ```json
 {
     "debug" : true,
@@ -25,9 +26,10 @@ Squadbot requires a ```settings.json``` file in its root directory (the same as 
     }
 }
 ```
+**NB: Protocols also have their own settings, these will be downloaded when installing a new protocol!**
 
 #### Plugins
-Squadbot plugins are very easy to write. Below is quite an advanced, yet a small example which uses the event-driven plugins API provided:
+Squadbot plugins are very easy to write. Below is small yet rather advanced example which uses the event-driven plugins API provided:
 
 ```javascript
 exports.plugin = {
