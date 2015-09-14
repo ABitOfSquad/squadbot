@@ -1,3 +1,5 @@
+require("./leakdetector");
+
 var fs = require("fs");
 var events = require("events");
 var emoji = require("./emoji");
