@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "dependencies" : {
     "npm" : "latest",
-    "whatsapi" : "latest",
-    "memwatch-next": "git://github.com/marcominetti/node-memwatch.git#ae8e23d135e669efa01a99fcc2b07945faea1e6a"
+    "whatsapi" : "latest"
   }
 }
