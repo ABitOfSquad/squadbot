@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "dependencies" : {
     "npm" : "latest",
-    "whatsapi" : " latest",
+    "whatsapi" : "latest",
     "memwatch" : " latest"
   }
 }
