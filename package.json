@@ -2,6 +2,8 @@
   "name": "whatsapi-squadbot",
   "version": "0.1.0",
   "dependencies" : {
-    "npm" : "latest"
+    "npm" : "latest",
+    "whatsapi" : " latest",
+    "memwatch" : " latest"
   }
 }
