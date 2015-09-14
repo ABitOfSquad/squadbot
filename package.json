@@ -4,6 +4,6 @@
   "dependencies" : {
     "npm" : "latest",
     "whatsapi" : "latest",
-    "memwatch" : " latest"
+    "memwatch" : "latest"
   }
 }
