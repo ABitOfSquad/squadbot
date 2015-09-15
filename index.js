@@ -3,7 +3,6 @@ var events = require("events");
 var emoji = require("./emoji");
 var plugins = require("./pluginmanager");
 var terminalhandler = require("./terminalhandler");
-var spm = require("./spm.js");
 
 global.bot = new events.EventEmitter();
 global.terminal = new events.EventEmitter();
@@ -101,7 +100,11 @@ catch (err) {
     process.exit();
 }
 
-spm.initProtocols();
+if(settings.spm.enabled){
+    var spm = require("./spm.js");
+
+    spm.initProtocols();
+}
 
 /**
  * Fired when the protocol is done loading

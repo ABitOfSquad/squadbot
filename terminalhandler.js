@@ -47,11 +47,9 @@ function askProtocol(empty){
  * Connects to spm and requests official protocols
  */
 function spmProtocolRequest(){
-    var officialProtocols = [];
-    //DEBUG
-    officialProtocols.push("demo");
-    logProtocols(officialProtocols, false);
-    //END DEBUG
+    require("./spm/spmDataRequests").getSpmProtocols(function(l){
+        logProtocols(l, false);
+    });
 }
 
 /**

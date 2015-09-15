@@ -1,6 +1,5 @@
 var fs = require("fs");
 var events = require("events");
-var net = require("net");
 var terminalhandle = require("./terminalhandler");
 
 var protocolIsLoaded;
@@ -213,7 +212,6 @@ function setProtocol(name) {
 function initTerminalCommands(){
     terminal.on("command", function(name, args){
         if(name === "spm") {
-
             switch(args[0]){
                 case "select":
                     if(args[1] == "-proto"){
