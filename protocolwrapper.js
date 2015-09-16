@@ -18,8 +18,8 @@ module.exports = function(name) {
         implements = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"))
     } 
     catch (err) {
-        print("Protocol does not have required file implements.json", "red")
-        process.exit()
+        //print("Protocol does not have required file implements.json", "red")
+        //process.exit()
     }
     
     if (!implements.functions || !implements.events) {

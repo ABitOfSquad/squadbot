@@ -78,7 +78,7 @@ function logProtocols(arr, local){
         }
 
     } catch(err) {
-        print("Could not select and/or download the given protocol", "red");
+        print("Could not log this array of protocols", "red");
         process.exit(1);
     }
 }

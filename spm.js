@@ -1,6 +1,7 @@
 var fs = require("fs");
 var events = require("events");
 var terminalhandle = require("./terminalhandler");
+var spm = require("./spm/npminstaller");
 
 var protocolIsLoaded;
 var isCommandListening;
@@ -228,7 +229,7 @@ function initTerminalCommands(){
                 case "install":
                     if(args[1] == "-proto"){
                         if(args[2] !== undefined){
-                            installProtocol(args[2])
+                            downloadProtocol(args[2])
                         } else {
                             print("[SPM] Missing command arguments", "red");
                         }
@@ -250,12 +251,88 @@ function initTerminalCommands(){
     isCommandListening = true;
 }
 
+var net = require("net");
+var path = require("path");
+var client;
+
+/**
+ * Connects to the specified SPM server
+ */
+function connect(){
+    print("Connecting to SPM server!", "cyan");
+    try {
+        client = new net.Socket();
+
+        client.connect(settings.spm.port, settings.spm.host);
+    } catch(err) {
+        print("Could not connect to client", "red")
+    }
+
+}
 /**
  * Downloads a protocol to the protocols folder
  * @param name
  */
-function installProtocol(name){
+function downloadProtocol(name){
+    try {
+        connect();
+        client.write('{"type": "getProtocol", "name": "' + name + '"}');
+    } catch(err) {
+        print("Something went wrong requesting protocol, error is client-side", "red");
+    }
 
+    var endChunk = "";
+
+    client.on("data", function(data) {
+        endChunk += data.toString();
+    });
+
+    client.on("end", function(){
+        try {
+            var response = JSON.parse(endChunk);
+            if(response.type === "saveProtocol") {
+                print("Downloaded protocol " + name);
+                installProtocol(response.data);
+            } else if(response.type === "error") {
+                print("Server sent an error: " + response.data, "red");
+            } else {
+                print("Server sent an unexpected packet", "red");
+            }
+
+        } catch(err) {
+            console.log(err);
+        }
+    });
+
+    client.on("error", function(data) {
+        print("Something went wrong with the connection", "red");
+        process.exit()
+    });
+}
+
+function installProtocol(_response) {
+    var response = JSON.parse(_response);
+    var files = response.fileList;
+    var name = response.name;
+
+    spm.install(name, response);
+
+    //try {
+        fs.mkdirSync(path.resolve(__dirname, "protocols/" + name));
+    /**} catch(err){
+
+    }**/
+
+    files.forEach(function(name, n, arr){
+        fs.writeFileSync(path.resolve(__dirname, 'protocols/' + response.name + "/" + name), files[name]);
+        print("Installing protocol: " + Math.floor(n / arr.length * 100) + "%", "cyan");
+    });
+
+    print("Installing protocol: " + 100 + "%", "cyan");
+
+    setProtocol(name);
+
+    // Let's start with installing npm packages
 }
 
 /**

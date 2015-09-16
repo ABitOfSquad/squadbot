@@ -39,20 +39,27 @@ exports.getSpmProtocols = function(callback) {
     var list;
 
     client.on("data", function(data) {
+
         try {
             var response = JSON.parse(data.toString("utf-8"));
-
             if(!response.type){
                 print("Invalid response: No type specified", "red");
             } else if(response.type === "protocolList" && response.data !== undefined) {
                 list = response.data;
+
+                if(list.length == 0) {
+                    print("Recieved empty array, perhaps the spm server you're connected to is rebooting.", "red");
+                    print("Please restart squadbot and try again.", "red");
+                    process.exit(1000);
+                }
 
                 callback(list);
             } else {
                 print("Did not get expected response.", "red");
             }
         } catch(err) {
-            print("Recieved a invalid response, something went wrong at spm global servers, please try again later", "red")
+            print("Recieved a invalid response, something went wrong at spm global servers, please try again later", "red");
+            process.exit(1000);
         }
     });
 
