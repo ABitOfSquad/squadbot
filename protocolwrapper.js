@@ -15,15 +15,15 @@ global.protocol = new events.EventEmitter()
  */
 module.exports = function(name) {
     try {
-        implements = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"))
+        var implement = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"))
     } 
     catch (err) {
         //print("Protocol does not have required file implements.json", "red")
         //process.exit()
     }
     
-    if (!implements.functions || !implements.events) {
-        print("Protocol does not have a valid mplements.json file", "red")
+    if (!implement.functions || !implement.events) {
+        print("Protocol does not have a valid implements.json file", "red")
         process.exit()
     }
 

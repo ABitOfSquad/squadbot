@@ -1,7 +1,7 @@
 var fs = require("fs");
 var events = require("events");
 var terminalhandle = require("./terminalhandler");
-var spm = require("./spm/npminstaller");
+var npmInstaller = require("./spm/npminstaller");
 
 var protocolIsLoaded;
 var isCommandListening;
@@ -315,22 +315,22 @@ function installProtocol(_response) {
     var files = response.fileList;
     var name = response.name;
 
-    spm.install(name, response);
+    npmInstaller.install(name, response);
 
-    //try {
+    try {
         fs.mkdirSync(path.resolve(__dirname, "protocols/" + name));
-    /**} catch(err){
+    } catch(err){
 
-    }**/
+    }
 
     files.forEach(function(name, n, arr){
         fs.writeFileSync(path.resolve(__dirname, 'protocols/' + response.name + "/" + name), files[name]);
-        print("Installing protocol: " + Math.floor(n / arr.length * 100) + "%", "cyan");
+        print("Installing protocol: " + Math.floor((n + 1) / arr.length * 100) + "%", "cyan");
     });
 
-    print("Installing protocol: " + 100 + "%", "cyan");
-
-    setProtocol(name);
+    npmInstaller.npmInstall.on("finish", function(){
+        setProtocol(name);
+    });
 
     // Let's start with installing npm packages
 }

@@ -4,5 +4,7 @@
   "dependencies" : {
     "npm" : "latest",
     "whatsapi" : "latest"
-  }
+  },
+  "license" : "MIT",
+  "repository" : "https://github.com/ABitOfSquad/squadbot.git"
 }

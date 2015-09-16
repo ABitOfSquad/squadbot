@@ -1,5 +1,9 @@
 var npm = require("npm");
 var fs = require("fs");
+var events = require("events");
+
+var eventmgr = new events.EventEmitter();
+exports.npmInstall = eventmgr
 
 /**
  * Converts the protocol json object to an array of string that can be read by npm
@@ -18,9 +22,15 @@ exports.install = function(name, obj) {
     var arr = createNpmDependenciesArray(obj);
     print("Installing " + arr.length + " NPM libraries", "cyan");
 
-    arr.forEach(function(dep){
+    arr.forEach(function(dep, i, arr){
+        if(i + 1 == arr.length){
+            var last = true
+        }
+
         saveUsage(name, dep);
-        download(dep)
+        download(dep, last)
+
+
     });
 
 };
@@ -31,7 +41,7 @@ exports.install = function(name, obj) {
  * @param dependency
  */
 function saveUsage(user, dependency){
-    //try {
+    try {
         var depregex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,16})$/i;
         if(!depregex.test(dependency)){
             print("Invalid dependency string" + dependency, "red");
@@ -63,9 +73,9 @@ function saveUsage(user, dependency){
 
         fs.writeFile('dependencyusers.json', JSON.stringify(oldObject));
         //done!
-    /**} catch(err) {
-        console.log(err.message);
-    }**/
+    } catch(err) {
+        console.log(err.stack);
+    }
 
 }
 
@@ -73,7 +83,7 @@ function saveUsage(user, dependency){
  * Installs a new npm library
  * @param npmstring name@version
  */
-function download(npmstring){
+function download(npmstring, last){
     try {
         npm.load({
             loaded: false
@@ -82,7 +92,12 @@ function download(npmstring){
                 if(er){
                     print("Could not install npm dependency " + npmstring, "red");
                 }
+
                 print("Installed " + npmstring + "!", "cyan");
+
+                if(last){
+                    eventmgr.emit("finish")
+                }
             });
         });
     } catch(err) {
