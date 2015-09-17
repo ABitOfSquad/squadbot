@@ -7,7 +7,7 @@ exports.plugin = {
 	"authors" : {
 		"Daniel Mizrachi" : "XD"
 	},
-	"reservedCommands": ["pirate", "yoda"],
+	"reservedCommands": ["pirate", "yoda", "rick"],
 	"collaborators" : {},
 	"version" : "1",
 	"protocol" : "1"
@@ -53,5 +53,21 @@ bot.on("command",function(cmd,args){
 		}).on("error",function(e){
 			console.log("Yoda get request error: "+e.message);
 		});
+	}else if(cmd === "rick"){
+		var quotes = [
+			"Wubbalubbadubduuuuub!!!",
+		    "Rickytickytavi beyoooooootch!!!",
+		    "And that's the waaaaaaaay the news goes!",
+		    "Hit the sack, Jack!",
+		    "Uh ohhhh, somersault jump!",
+		    "AIDS!",
+		    "Shum shum shlippedy dop!",
+		    "Graaaaaaaaaaaass tastes bad.",
+		    "No jumpin' in the sewer.",
+		    "Burger time!",
+		    "Rubber baby babby bunkerrrrs!!!",
+		    "Lick lick lick ma baaaaalls!"
+		];
+		bot.send(quotes[Math.floor(Math.random()*quotes.length)]);
 	}
 });
