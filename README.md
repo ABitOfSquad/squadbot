@@ -3,9 +3,6 @@
 
 **Heads up! THIS PROJECT IS WORKING AND BREAKING PRETTY MUCH EVERY DAY AT THIS POINT, SO DON'T EXPECT A STABLE VERSION FOR A WHILE.**
 
-
-A bridge over the Node-whatsapi to run 'Squadbot' applications. The API we are using is our successor of the Node Whatsapi project, which got discontinued.
-
 #### What is Squadbot?
 
 Squadbot is an advanced plugin API written for chat bots. With the ability to write your own protocols and plugins, you can fairly easily augment the bot in whatever way best suits you. And if you aren't a programmer, Squadbot is a piece of cake to install and set up. With our own package manager (soon to be introduced), you can add different protocols and plugins with a single command. But the core of Squadbot can be used for much more than only chat bots. We are working on a secure plugin system so that with slight modifications, Squadbot can be used for everything that requires plugin management. There have been ideas popping up in the team about a Siri-like home assistant, and even a flexible home security system that could be made possible with small modifications to the protocol.
