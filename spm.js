@@ -160,7 +160,7 @@ function initProtocolLoading(){
     try {
         if(settings["protocol"] !== undefined || settings["protocol"] == ""){
             if(!fs.existsSync("./protocols/" + settings["protocol"] + "/")) {
-                print("gven protocol not installed", "red");
+                print("Given protocol not installed", "red");
 
                 isInitializing = true;
                 print("Protocol defined in settings is not downloaded", "red");
@@ -172,7 +172,15 @@ function initProtocolLoading(){
             } else {
                 loadProtocol(settings["protocol"])
             }
-        } else {
+        } 
+        else if (process.argv[2]) {
+            if(!fs.existsSync("./protocols/" + process.argv[2] + "/")) {
+                print("Given protocol not installed", "red");
+            } else {
+                loadProtocol(process.argv[2])
+            }
+        }
+        else {
             print("Protocol not defined in settings, assuming a new installation is being used");
             isInitializing = true;
             terminalhandle.askProtocol(true);
