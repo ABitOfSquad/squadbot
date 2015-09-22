@@ -182,12 +182,7 @@ protocol.on("location", function(id, loc) {
 })
 
 protocol.on("finished", function(){
-    try {
-        passEvent("loadingProtocolDone", protocol.homeGroup)
-    } catch(err){
-        console.log(err.stack)
-    }
-
+    bot.emit("loadingProtocolDone")
 });
 
 /**
