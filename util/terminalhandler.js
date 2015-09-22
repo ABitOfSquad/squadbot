@@ -47,7 +47,7 @@ function askProtocol(empty){
  * Connects to spm and requests official protocols
  */
 function spmProtocolRequest(){
-    require("./spm/spmDataRequests").getSpmProtocols(function(l){
+    require("./../spm/spmDataRequests").getSpmProtocols(function(l){
         logProtocols(l, false);
     });
 }

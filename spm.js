@@ -1,6 +1,6 @@
 var fs = require("fs");
 var events = require("events");
-var terminalhandle = require("./terminalhandler");
+var terminalhandle = require("./util/terminalhandler");
 var npmInstaller = require("./spm/npminstaller");
 
 var protocolIsLoaded;

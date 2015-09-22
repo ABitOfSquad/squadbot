@@ -1,8 +1,8 @@
 var fs = require("fs");
 var events = require("events");
-var emoji = require("./emoji");
+var emoji = require("./util/emoji");
 var plugins = require("./pluginmanager");
-var terminalhandler = require("./terminalhandler");
+var terminalhandler = require("./util/terminalhandler");
 
 global.bot = new events.EventEmitter();
 global.terminal = new events.EventEmitter();
