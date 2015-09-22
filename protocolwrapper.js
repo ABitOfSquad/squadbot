@@ -61,7 +61,7 @@ module.exports = function(name) {
  */
 function passCall(name, args) {
     if (implementations.functions[name]) {
-        return protocol[name].apply(this, args)
+        return protocolFile[name].apply(this, args)
     }
     else {
         throw new Error("Plugin tried to call the unimplemented protocol function " + name)
