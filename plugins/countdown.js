@@ -120,22 +120,26 @@ bot.on("command",function(cmd,args){
 	}
 });
 
-bot.private().on("message",function(body,meta){
-	if(playing && submitting){
-		if(submitted[meta.from]){
-			bot.private(meta.from).send("Oops, you've already submitted a word!");
-		}else{
-			if(body.length > 1 && body.length < 10){
-				body = body.toUpperCase();
-				if(/^[A-Z]+$/.test(body)){
-					submitted[meta.notify] = body;
-					bot.private(meta.from).send("Thanks. Now return to the group chat to see the results!");
-				}else{
-					bot.private(meta.from).send("Oops, your word contains more than just letters. Quick, try again!");
-				}
+try {
+	bot.private().on("message",function(body,meta){
+		if(playing && submitting){
+			if(submitted[meta.from]){
+				bot.private(meta.from).send("Oops, you've already submitted a word!");
 			}else{
-				bot.private(meta.from).send("Oops, your letter must be minimum 2 and maximum 9 letters long!");
+				if(body.length > 1 && body.length < 10){
+					body = body.toUpperCase();
+					if(/^[A-Z]+$/.test(body)){
+						submitted[meta.notify] = body;
+						bot.private(meta.from).send("Thanks. Now return to the group chat to see the results!");
+					}else{
+						bot.private(meta.from).send("Oops, your word contains more than just letters. Quick, try again!");
+					}
+				}else{
+					bot.private(meta.from).send("Oops, your letter must be minimum 2 and maximum 9 letters long!");
+				}
 			}
 		}
-	}
-});
+	});
+} catch(err){
+	print("Could not access private functions for this protocol (countdown.js)", "red")
+}
