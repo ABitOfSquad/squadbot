@@ -17,12 +17,12 @@ global.protocol = new events.EventEmitter();
 module.exports = function(name) {
     try {
         implementations = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"));
-    } 
+    }
     catch (err) {
         print("Protocol does not have required file implements.json", "red")
         process.exit()
     }
-    
+
     if (!JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8")).functions || !JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8")).events) {
         print("Protocol does not have a valid implements.json file", "red")
         process.exit()
@@ -39,12 +39,12 @@ module.exports = function(name) {
         console.log(err.stack);
         process.exit()
     }
-    
+
 
     if (protSettings.emojiPolicy) {
         global.emojiPolicy = protSettings.emojiPolicy
     }
-    
+
     if (protSettings.homeGroup) {
         protocol.homeGroup = protSettings.homeGroup
     }
@@ -105,8 +105,6 @@ bot.getMembers = function(callback) {
  * Creates an object from a new message
  */
 protocol.on("message", function(from, body, meta) {
-    console.log(from);
-    console.log(body + "<_");
     if (body.substring(0, 1) == "!" || body.substring(0, 1) == "/") {
         var parts = body.substring(1).split(" ");
         var event = "command"
@@ -120,7 +118,7 @@ protocol.on("message", function(from, body, meta) {
         var arg2 = meta
         var arg3 = undefined
     }
-    
+
     if (protocol.homeGroup == from) {
         bot.emit(event, arg1, arg2, arg3)
     }
@@ -139,7 +137,7 @@ function passEvent(event, id, args) {
     if (!args) {
         args = []
     }
-    
+
     if (protocol.homeGroup == id) {
         args.unshift(event)
         bot.emit.apply(this, args)
@@ -149,7 +147,7 @@ function passEvent(event, id, args) {
             args.unshift(event)
             privateEmitters[from].emit.apply(this, args)
         }
-        
+
         globalPrivate.emit.apply(this, args)
     }
 }
@@ -192,7 +190,7 @@ protocol.on("finished", function(){
  */
 function privateEmitter(id) {
     var emitter = new events.EventEmitter()
-    
+
     if (implementations.functions.private.sendMessage) {
         emitter.send = emitter.sendMessage = function(msg) {
             emitter.in.sendMessage(msg)
@@ -203,7 +201,7 @@ function privateEmitter(id) {
             throw new Error("Plugin tried use the private().sendMessage api, which is not implemented in this protocol")
         }
     }
-    
+
     if (implementations.functions.private.sendImage) {
         emitter.sendImage = function(image, caption) {
             emitter.in.sendImage(image, caption)
@@ -214,7 +212,7 @@ function privateEmitter(id) {
             throw new Error("Plugin tried use the private().sendImage api, which is not implemented in this protocol")
         }
     }
-    
+
     if (implementations.functions.private.sendVideo) {
         emitter.sendVideo = function(video, caption) {
             emitter.in.sendVideo(image, caption)
@@ -225,7 +223,7 @@ function privateEmitter(id) {
             throw new Error("Plugin tried use the private().sendVideo api, which is not implemented in this protocol")
         }
     }
-    
+
     if (implementations.functions.private.sendAudio) {
         emitter.sendAudio = function(audio) {
             emitter.in.sendAudio(audio)
@@ -236,7 +234,7 @@ function privateEmitter(id) {
             throw new Error("Plugin tried use the private().sendAudio api, which is not implemented in this protocol")
         }
     }
-    
+
     if (implementations.functions.private.sendContact) {
         emitter.sendAudio = function(fields) {
             emitter.in.sendContact(fields)
@@ -247,7 +245,7 @@ function privateEmitter(id) {
             throw new Error("Plugin tried use the private().sendContact api, which is not implemented in this protocol")
         }
     }
-    
+
     if (implementations.functions.private.sendTyping) {
         emitter.type = emitter.sendTyping = function(duration) {
             emitter.in.sendTyping(duration)
@@ -258,7 +256,7 @@ function privateEmitter(id) {
             throw new Error("Plugin tried use the private().sendTyping api, which is not implemented in this protocol")
         }
     }
-    
+
     emitter.on("typing", function(author) {
         passEvent("typing", [author])
     })
@@ -274,13 +272,13 @@ function privateEmitter(id) {
     emitter.on("audio", function(audio) {
         passEvent("audio", [audio])
     })
-    
+
     if (!implementations.events.private.video) {
         emitter.on("video", function(video) {
             passEvent("video", [video])
         })
     }
-    
+
     if (!implementations.events.private.video) {
         emitter.on("location", function(loc) {
             passEvent("location", [loc])
@@ -293,13 +291,13 @@ protocol.private = function(id) {
         if (!privateEmitters[id]) {
             privateEmitters[id] = new privateEmitter(id)
         }
-        
+
         var emitter = privateEmitters[id]
     }
     else {
         var emitter = globalPrivate
     }
-    
+
     return emitter
 }
 
@@ -312,12 +310,12 @@ bot.private = function(id) {
         if (!privateEmitters[id]) {
             privateEmitters[id] = new privateEmitter(id)
         }
-        
+
         var emitter = privateEmitters[id]
     }
     else {
         var emitter = globalPrivate
     }
-    
+
     return emitter
 }
