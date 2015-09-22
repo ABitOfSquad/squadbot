@@ -100,12 +100,6 @@ catch (err) {
     process.exit();
 }
 
-if(settings.spm.enabled){
-    var spm = require("./spm.js");
-
-    spm.initProtocols();
-}
-
 /**
  * Fired when the protocol is done loading
  */
@@ -114,3 +108,10 @@ bot.on("loadingProtocolDone", function() {
     //lets start the pluginmanager
     plugins.init(settings["plugin_folder"]);
 })
+
+
+if(settings.spm.enabled){
+    var spm = require("./spm.js");
+
+    spm.initProtocols();
+}

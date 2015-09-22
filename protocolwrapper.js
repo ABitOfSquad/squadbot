@@ -3,11 +3,12 @@ var http = require("http")
 var stream = require("stream").Transform
 var fs = require("fs")
 
-var implements = {}
-var privateEmitters = {}
-var globalPrivate = new events.EventEmitter()
+var implementations = {};
+var privateEmitters = {};
+var globalPrivate = new events.EventEmitter();
+var protocolFile;
 
-global.protocol = new events.EventEmitter()
+global.protocol = new events.EventEmitter();
 
 /**
  * Creates a new wrapper for a protocol
@@ -15,20 +16,20 @@ global.protocol = new events.EventEmitter()
  */
 module.exports = function(name) {
     try {
-        var implement = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"));
-        console.log("test")
+        implementations = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"));
     } 
     catch (err) {
         print("Protocol does not have required file implements.json", "red")
         process.exit()
     }
     
-    if (!implement.functions || !implement.events) {
+    if (!JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8")).functions || !JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8")).events) {
         print("Protocol does not have a valid implements.json file", "red")
         process.exit()
     }
 
-    var _protocol = require("./protocols/" + name + "/protocol.js")
+    var _protocol = require("./protocols/" + name + "/protocol.js");
+    protocolFile = _protocol;
 
     try {
         var protSettings = JSON.parse(fs.readFileSync("protocols/" + name + "/settings.json", "utf8"))
@@ -59,7 +60,7 @@ module.exports = function(name) {
  * @returns {*}
  */
 function passCall(name, args) {
-    if (implements.functions[name]) {
+    if (implementations.functions[name]) {
         return protocol[name].apply(this, args)
     }
     else {
@@ -72,7 +73,7 @@ function passCall(name, args) {
  * @type {Function}
  */
 
-bot.send = bot.sendMessage = function(msg) {
+bot.send =function(msg) {
     return passCall("sendMessage", [msg])
 }
 
@@ -192,7 +193,7 @@ protocol.on("finished", function(){
 function privateEmitter(id) {
     var emitter = new events.EventEmitter()
     
-    if (implements.functions.private.sendMessage) {
+    if (implementations.functions.private.sendMessage) {
         emitter.send = emitter.sendMessage = function(msg) {
             emitter.in.sendMessage(msg)
         }
@@ -203,7 +204,7 @@ function privateEmitter(id) {
         }
     }
     
-    if (implements.functions.private.sendImage) {
+    if (implementations.functions.private.sendImage) {
         emitter.sendImage = function(image, caption) {
             emitter.in.sendImage(image, caption)
         }
@@ -214,7 +215,7 @@ function privateEmitter(id) {
         }
     }
     
-    if (implements.functions.private.sendVideo) {
+    if (implementations.functions.private.sendVideo) {
         emitter.sendVideo = function(video, caption) {
             emitter.in.sendVideo(image, caption)
         }
@@ -225,7 +226,7 @@ function privateEmitter(id) {
         }
     }
     
-    if (implements.functions.private.sendAudio) {
+    if (implementations.functions.private.sendAudio) {
         emitter.sendAudio = function(audio) {
             emitter.in.sendAudio(audio)
         }
@@ -236,7 +237,7 @@ function privateEmitter(id) {
         }
     }
     
-    if (implements.functions.private.sendContact) {
+    if (implementations.functions.private.sendContact) {
         emitter.sendAudio = function(fields) {
             emitter.in.sendContact(fields)
         }
@@ -247,7 +248,7 @@ function privateEmitter(id) {
         }
     }
     
-    if (implements.functions.private.sendTyping) {
+    if (implementations.functions.private.sendTyping) {
         emitter.type = emitter.sendTyping = function(duration) {
             emitter.in.sendTyping(duration)
         }
@@ -274,13 +275,13 @@ function privateEmitter(id) {
         passEvent("audio", [audio])
     })
     
-    if (!implements.events.private.video) {
+    if (!implementations.events.private.video) {
         emitter.on("video", function(video) {
             passEvent("video", [video])
         })
     }
     
-    if (!implements.events.private.video) {
+    if (!implementations.events.private.video) {
         emitter.on("location", function(loc) {
             passEvent("location", [loc])
         })
@@ -303,7 +304,7 @@ protocol.private = function(id) {
 }
 
 bot.private = function(id) {
-    if (!implements.functions.private) {
+    if (!implementations.functions.private) {
         throw new Error("Plugin tried use the private() api, which is not available for this protocol.")
     }
 
