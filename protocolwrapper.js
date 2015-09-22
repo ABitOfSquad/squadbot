@@ -7,7 +7,7 @@ var implements = {}
 var privateEmitters = {}
 var globalPrivate = new events.EventEmitter()
 
-global.protocol = new events.EventEmitter()
+globals.protocol = new events.EventEmitter()
 
 /**
  * Creates a new wrapper for a protocol
@@ -18,8 +18,8 @@ module.exports = function(name) {
         var implement = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"))
     } 
     catch (err) {
-        //print("Protocol does not have required file implements.json", "red")
-        //process.exit()
+        print("Protocol does not have required file implements.json", "red")
+        process.exit()
     }
     
     if (!implement.functions || !implement.events) {
