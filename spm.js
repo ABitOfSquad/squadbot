@@ -18,8 +18,15 @@ exports.loadProtocol = function(name) { loadProtocol(name)};
 function loadProtocol(name) {
     if(!protocolIsLoaded){
         print("Loading protocol " + name);
-        require("./protocolwrapper.js")(name);
-        protocolIsLoaded = true;
+        try {
+            protocolIsLoaded = true;
+            require("./protocolwrapper.js")(name)
+        } catch(err){
+            console.log(err.stack);
+            process.exit()
+        }
+
+
     }
 }
 

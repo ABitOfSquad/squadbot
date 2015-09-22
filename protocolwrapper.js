@@ -7,7 +7,7 @@ var implements = {}
 var privateEmitters = {}
 var globalPrivate = new events.EventEmitter()
 
-globals.protocol = new events.EventEmitter()
+global.protocol = new events.EventEmitter()
 
 /**
  * Creates a new wrapper for a protocol
@@ -15,7 +15,8 @@ globals.protocol = new events.EventEmitter()
  */
 module.exports = function(name) {
     try {
-        var implement = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"))
+        var implement = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"));
+        console.log("test")
     } 
     catch (err) {
         print("Protocol does not have required file implements.json", "red")
@@ -27,7 +28,7 @@ module.exports = function(name) {
         process.exit()
     }
 
-    var protocol = require("./protocols/" + name + "/protocol.js")
+    var _protocol = require("./protocols/" + name + "/protocol.js")
 
     try {
         var protSettings = JSON.parse(fs.readFileSync("protocols/" + name + "/settings.json", "utf8"))
@@ -47,7 +48,7 @@ module.exports = function(name) {
         protocol.homeGroup = protSettings.homeGroup
     }
 
-    protocol.init(protSettings)
+    _protocol.init(protSettings)
 }
 
 /**
@@ -179,6 +180,15 @@ protocol.on("video", function(id, video) {
 protocol.on("location", function(id, loc) {
     passEvent("location", id, [loc])
 })
+
+protocol.on("finished", function(){
+    try {
+        passEvent("loadingProtocolDone", protocol.homeGroup)
+    } catch(err){
+        console.log(err.stack)
+    }
+
+});
 
 /**
  * Handling events and calls using private messaging
