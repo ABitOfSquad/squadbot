@@ -50,6 +50,7 @@ function loadPlugins(){
 
             loopThroughPluginsfolder(function (){
                 print("All plugins loaded");
+                bot.emit("finishedLoading");
             });
         }
     }

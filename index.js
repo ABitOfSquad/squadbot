@@ -4,6 +4,8 @@ var emoji = require("./util/emoji");
 var plugins = require("./pluginmanager");
 var terminalhandler = require("./util/terminalhandler");
 
+var isRunning = false;
+
 global.bot = new events.EventEmitter();
 global.terminal = new events.EventEmitter();
 
@@ -101,17 +103,28 @@ catch (err) {
 }
 
 /**
+ * Fired when completely done loading squadbot and its plugins!
+ */
+bot.on("finishedLoading", function(){
+    if(!isRunning){
+        isRunning = true;
+        print("Done loading in " + process.uptime() + "s!", "green", "bold");
+    }
+});
+
+/**
  * Fired when the protocol is done loading
  */
 bot.on("loadingProtocolDone", function() {
     print("Protocol loaded, loading plugins");
     //lets start the pluginmanager
     plugins.init(settings["plugin_folder"]);
-})
+});
 
-
+/**
+ * If spm is enabled, do your thing, and download some protocols!
+ */
 if(settings.spm.enabled){
     var spm = require("./spm.js");
-
     spm.initProtocols();
 }
