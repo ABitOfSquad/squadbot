@@ -21,6 +21,27 @@ function listen(){
 }
 
 /**
+ * Temporarily for the new terminal api
+ **/
+function prepare(input){
+    var text = input.trim().toLowerCase();
+    var _parts = text.split(" ");
+    var name = args[0]
+    var parts = _parts.slice(1);
+
+    var flags = [];
+    var args = [];
+
+    parts.forEach(function(element, index, array) {
+        if(element.indexOf("-") === 0){
+          flags.push(element.substring(1))
+        } else {
+          args.push(element);
+        }
+    });
+}
+
+/**
  * Requests either plugins from local folder or spm official protocols database
  *
  * @param empty True when there are no local protocols installed
