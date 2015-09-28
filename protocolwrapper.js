@@ -6,7 +6,9 @@ var fs = require("fs")
 var implementations = {};
 var privateEmitters = {};
 var globalPrivate = new events.EventEmitter();
+
 var protocolFile;
+var protocolSettings;
 
 global.protocol = new events.EventEmitter();
 
@@ -15,40 +17,38 @@ global.protocol = new events.EventEmitter();
  * @param name name of the protocol
  */
 module.exports = function(name) {
+
+    //Load the implementations of this protocol
     try {
         implementations = JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8"));
-    }
-    catch (err) {
+    } catch (err) {
         print("Protocol does not have required file implements.json", "red")
         process.exit()
     }
 
+    //does the implements.json file have the required variables
     if (!JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8")).functions || !JSON.parse(fs.readFileSync("protocols/" + name + "/implements.json", "utf8")).events) {
-        print("Protocol does not have a valid implements.json file", "red")
+        print("Protocol does not have a valid implements.json file", "red");
         process.exit()
     }
 
-    var _protocol = require("./protocols/" + name + "/protocol.js");
-    protocolFile = _protocol;
+    //load the file!
+    protocolFile = require("./protocols/" + name + "/protocol.js");
 
+    //load the protocolSettings into var
     try {
-        var protSettings = JSON.parse(fs.readFileSync("protocols/" + name + "/settings.json", "utf8"))
-    }
-    catch (err) {
-        print("Could not load protocol settings", "red")
-        console.log(err.stack);
+        protocolSettings = JSON.parse(fs.readFileSync("protocols/" + name + "/settings.json", "utf8"))
+    } catch (err) {
+        print("Could not load protocol settings", "red");
+        print(err.stack, "red");
         process.exit()
     }
 
+    //load the emoji policy and the homegroup
+    global.emojiPolicy = (protSettings.emojiPolicy !== undefined ? protSettings.emojiPolicy : false);
+    protocol.homeGroup = (protSettings.homeGroup !== undefined ? protSettings.homeGroup : false);
 
-    if (protSettings.emojiPolicy) {
-        global.emojiPolicy = protSettings.emojiPolicy
-    }
-
-    if (protSettings.homeGroup) {
-        protocol.homeGroup = protSettings.homeGroup
-    }
-
+    //fire the required init function exported in the protocol file
     _protocol.init(protSettings)
 }
 
@@ -62,8 +62,7 @@ module.exports = function(name) {
 function passCall(name, args) {
     if (implementations.functions[name]) {
         return protocolFile[name].apply(this, args)
-    }
-    else {
+    } else {
         throw new Error("Plugin tried to call the unimplemented protocol function " + name)
     }
 }
@@ -102,20 +101,44 @@ bot.getMembers = function(callback) {
 }
 
 /**
+ * Passes events to the API emitter
+ * @param event
+ * @param id
+ * @param args
+ */
+function passEvent(event, id, args) {
+    if (!args) {
+        args = []
+    }
+
+    if (protocol.homeGroup === id) {
+        args.unshift(event)
+        bot.emit.apply(this, args)
+    } else {
+        if (privateEmitters[id]) {
+            args.unshift(event)
+            privateEmitters[from].emit.apply(this, args)
+        }
+
+        globalPrivate.emit.apply(this, args)
+    }
+}
+
+/**
  * Creates an object from a new message
  */
 protocol.on("message", function(from, body, meta) {
     if (body.substring(0, 1) == "!" || body.substring(0, 1) == "/") {
         var parts = body.substring(1).split(" ");
-        var event = "command"
-        var arg1 = parts[0].toLowerCase()
-        var arg2 = parts.slice(1)
+        var event = "command";
+        var arg1 = parts[0].toLowerCase();
+        var arg2 = parts.slice(1);
         var arg3 = meta
     }
     else {
-        var event = "message"
-        var arg1 = body
-        var arg2 = meta
+        var event = "message";
+        var arg1 = body;
+        var arg2 = meta;
         var arg3 = undefined
     }
 
@@ -128,34 +151,8 @@ protocol.on("message", function(from, body, meta) {
 })
 
 /**
- * Passes events to the API emitter
- * @param event
- * @param id
- * @param args
- */
-function passEvent(event, id, args) {
-    if (!args) {
-        args = []
-    }
-
-    if (protocol.homeGroup == id) {
-        args.unshift(event)
-        bot.emit.apply(this, args)
-    }
-    else {
-        if (privateEmitters[id]) {
-            args.unshift(event)
-            privateEmitters[from].emit.apply(this, args)
-        }
-
-        globalPrivate.emit.apply(this, args)
-    }
-}
-
-/**
  * Emits all the events
  */
-
 protocol.on("typing", function(id, author) {
     passEvent("typing", id, [author])
 })
@@ -195,8 +192,7 @@ function privateEmitter(id) {
         emitter.send = emitter.sendMessage = function(msg) {
             emitter.in.sendMessage(msg)
         }
-    }
-    else {
+    } else {
         emitter.send = emitter.sendMessage = function() {
             throw new Error("Plugin tried use the private().sendMessage api, which is not implemented in this protocol")
         }
@@ -206,8 +202,7 @@ function privateEmitter(id) {
         emitter.sendImage = function(image, caption) {
             emitter.in.sendImage(image, caption)
         }
-    }
-    else {
+    } else {
         emitter.sendImage = function() {
             throw new Error("Plugin tried use the private().sendImage api, which is not implemented in this protocol")
         }
@@ -217,8 +212,7 @@ function privateEmitter(id) {
         emitter.sendVideo = function(video, caption) {
             emitter.in.sendVideo(image, caption)
         }
-    }
-    else {
+    } else {
         emitter.sendVideo = function() {
             throw new Error("Plugin tried use the private().sendVideo api, which is not implemented in this protocol")
         }
@@ -228,8 +222,7 @@ function privateEmitter(id) {
         emitter.sendAudio = function(audio) {
             emitter.in.sendAudio(audio)
         }
-    }
-    else {
+    } else {
         emitter.sendAudio = function() {
             throw new Error("Plugin tried use the private().sendAudio api, which is not implemented in this protocol")
         }
@@ -239,8 +232,7 @@ function privateEmitter(id) {
         emitter.sendAudio = function(fields) {
             emitter.in.sendContact(fields)
         }
-    }
-    else {
+    } else {
         emitter.sendContact = function() {
             throw new Error("Plugin tried use the private().sendContact api, which is not implemented in this protocol")
         }
@@ -250,8 +242,7 @@ function privateEmitter(id) {
         emitter.type = emitter.sendTyping = function(duration) {
             emitter.in.sendTyping(duration)
         }
-    }
-    else {
+    } else {
         emitter.type = emitter.sendTyping = function() {
             throw new Error("Plugin tried use the private().sendTyping api, which is not implemented in this protocol")
         }
@@ -287,18 +278,7 @@ function privateEmitter(id) {
 }
 
 protocol.private = function(id) {
-    if (id) {
-        if (!privateEmitters[id]) {
-            privateEmitters[id] = new privateEmitter(id)
-        }
-
-        var emitter = privateEmitters[id]
-    }
-    else {
-        var emitter = globalPrivate
-    }
-
-    return emitter
+    return getPrivateEmitter(id)
 }
 
 bot.private = function(id) {
@@ -306,16 +286,20 @@ bot.private = function(id) {
         throw new Error("Plugin tried use the private() api, which is not available for this protocol.")
     }
 
-    if (id) {
-        if (!privateEmitters[id]) {
-            privateEmitters[id] = new privateEmitter(id)
-        }
+    return getPrivateEmitter(id);
+}
 
-        var emitter = privateEmitters[id]
-    }
-    else {
-        var emitter = globalPrivate
-    }
+/**
+ * Gets the used private emitter
+ */
+function getPrivateEmitter(id) {
+  if (id) {
+      if (!privateEmitters[id]) {
+          privateEmitters[id] = new privateEmitter(id)
+      }
 
-    return emitter
+      return privateEmitters[id]
+  } else {
+      return globalPrivate
+  }
 }
