@@ -6,6 +6,9 @@ var terminalhandler = require("./util/terminalhandler");
 
 var isRunning = false;
 
+// Because seeing "squadbot" in the system monitor is reay cool
+process.title = "squadbot"
+
 global.bot = new events.EventEmitter();
 global.terminal = new events.EventEmitter();
 
@@ -38,39 +41,39 @@ global.print = function print(text, color, style) {
         "gray": '37m',
         "white": '0m'
     }
-    
+
     var styles = {
         "bold": "1;",
         "lighter": "2;",
         "italic": "3;",
         "underline": "4;"
     }
-    
+
     var output = '\033[0m' // Clear all previous colors (just in case)
-    
+
     if (color) {
         if (colors[color]) {
             var styleCode = ""
-            
+
             if (styles[style]) {
                 styleCode = styles[style]
             }
-            
+
             output += '\033[' + styleCode + colors[color]
         }
     }
-    
+
     var d = new Date()
     var h = (d.getHours() < 10 ? "0" : "") + d.getHours()
     var m = (d.getMinutes() < 10 ? "0" : "") + d.getMinutes()
     var s = (d.getSeconds() < 10 ? "0" : "") + d.getSeconds()
-    
+
     output += "[" + h + ":" + m + ":" + s + "] " + text
-    
+
     if (color) {
         output += '\033[0m'
     }
-    
+
     console.log(output);
 };
 
@@ -96,7 +99,7 @@ try {
     print("Settings.json successfully loaded into memory!");
 
     bot.setMaxListeners(settings["max_event_listeners"]);
-} 
+}
 catch (err) {
     print("Could not load settings file", "red");
     process.exit();
