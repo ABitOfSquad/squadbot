@@ -12,15 +12,17 @@ var reservedCommands;
  */
 exports.init = function(folder){
     try {
+        // Get list of folders in plugins folder
         pluginList = fs.readdirSync(folder).filter(function(file) {
-            return fs.statSync(path.join(folder, file)).isFile();
-        });
+            return fs.statSync(path.join(__dirname + "/" + folder + "/", file)).isDirectory();
+        })
 
         pluginFolder = folder;
         loadPlugins()
     }
     catch (err) {
         pluginList = false;
+        console.log(err.stack);
 
         print("Could not load contents of plugin folder", "red");
         process.exit()
@@ -60,40 +62,111 @@ function loopThroughPluginsfolder(callback){
     reservedCommands = {};
 
     for (var i = 0; i < pluginList.length; i++) {
+        var styledErrorName = "plugin \033[35m" + pluginList[i] + "\033[31m"
+        var styledWarningName = "plugin \033[33m" + pluginList[i] + "\033[38;5;202m"
+        console.log(pluginList[i]);
+
         try {
-            var plugin = require("./" + pluginFolder + "/" + pluginList[i]).plugin;
+            try {
+                var meta = fs.readFileSync(pluginFolder + "/" + pluginList[i] + "/plugin.json", "utf8");
+            } catch (err) {
+                print("Missing plugin.json for " + styledErrorName + ", skipping", "red");
+                continue;
+            }
 
-            //does the plugin has a exports.plugins?
-            if (!plugin) {
-                print("Warning: plugin " + pluginList[i] + " does not implement exports.plugin", "red")
-            } else {
-                //do some fancy commands checking
-                if (plugin.reservedCommands) {
+            try {
+                meta = JSON.parse(meta)
+            } catch (err) {
+                print("The plugin.json for " + styledErrorName + " has syntax errors, skipping", "red");
+                continue;
+            }
 
-                    for (var t = 0; t < plugin.reservedCommands.length; t++) {
-                        if (reservedCommands[plugin.reservedCommands[t]]) {
-                            print("Both " + pluginList[i] + " and " + reservedCommands[plugin.reservedCommands[t]] + " depend on the same command, please disable one of them.", "red");
-                            process.exit();
-                        }
-                        else {
-                            reservedCommands[plugin.reservedCommands[t]] = pluginList[i]
-                        }
-                    }
+            var required = ["name", "version", "description", "enabled"]
+            var found = false;
 
-                }
-
-                if (!plugin["name"]) {
-                    print("Loaded " + pluginList[i] + "!")
-                }
-                else {
-                    print("Loaded " + plugin["name"] + " v" + plugin["version"] + "!")
+            for (var t = 0; t < required.length; t++) {
+                if (typeof meta[required[t]] == "undefined") {
+                    print("The plugin.json for " + styledErrorName + " is missing the required value \"" + required[t] + "\", skipping", "red");
+                    found = true
+                    break;
                 }
             }
+
+            if (found) {
+                continue
+            }
+
+            if (!meta.enabled) {
+                print("The " + styledErrorName + " has been disabled in its plugin.json, skipping", "red");
+                continue;
+            }
+
+            if (meta.reservedCommands) {
+                for (var t = 0; t < meta.reservedCommands.length; t++) {
+                    if (reservedCommands[meta.reservedCommands[t]]) {
+                        print("Both " + styledErrorName + " and \033[35m" + reservedCommands[meta.reservedCommands[t]] + "\033[31m depend on the same command, please disable one of them.", "red");
+                        process.exit();
+                    }
+                    else {
+                        reservedCommands[meta.reservedCommands[t]] = pluginList[i]
+                    }
+                }
+            }
+
+            if (!meta.script) {
+                meta.script = "index.js"
+                print("Warning: The " + styledWarningName + " does not have a script path in its plugin.json, using default \"index.js\"", "orange");
+            }
+
+            try {
+                fs.readFileSync(pluginFolder + "/" + pluginList[i] + "/" + meta.script, "utf8");
+            } catch (err) {
+                print("Can't read the script \"" + meta.script + "\" for " + styledErrorName + ", skipping", "red");
+            }
+
         } catch (err) {
-            print("Plugin " + pluginList[i] + " crashed with the following error:", "red");
+            print("Could not load " + styledErrorName + ", the following error was thrown:", "red");
             console.log(err.stack);
         }
+
+
+
+
+
+        // try {
+        //     var plugin = require("./" + pluginFolder + "/" + pluginList[i]).plugin;
+        //
+        //     //does the plugin has a exports.plugins?
+        //     if (!plugin) {
+        //         print("Warning: plugin " + pluginList[i] + " does not implement exports.plugin", "red")
+        //     } else {
+        //         //do some fancy commands checking
+        //         if (plugin.reservedCommands) {
+        //
+        //             for (var t = 0; t < plugin.reservedCommands.length; t++) {
+        //                 if (reservedCommands[plugin.reservedCommands[t]]) {
+        //                     print("Both " + pluginList[i] + " and " + reservedCommands[plugin.reservedCommands[t]] + " depend on the same command, please disable one of them.", "red");
+        //                     process.exit();
+        //                 }
+        //                 else {
+        //                     reservedCommands[plugin.reservedCommands[t]] = pluginList[i]
+        //                 }
+        //             }
+        //
+        //         }
+        //
+        //         if (!plugin["name"]) {
+        //             print("Loaded " + pluginList[i] + "!")
+        //         }
+        //         else {
+        //             print("Loaded " + plugin["name"] + " v" + plugin["version"] + "!")
+        //         }
+        //     }
+        // } catch (err) {
+        //     print("Plugin " + pluginList[i] + " crashed with the following error:", "red");
+        //     console.log(err.stack);
+        // }
     }
 
-    callback()
+    // callback()
 }

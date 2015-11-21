@@ -34,12 +34,13 @@ global.print = function print(text, color, style) {
         "black": '30m', // Should probably not be used
         "red": '31m',
         "green": '32m',
-        "brown": '33m',
+        "yellow": '33m',
         "blue": '34m',
         "purple": '35m',
         "cyan": '36m',
         "gray": '37m',
-        "white": '0m'
+        "white": '0m',
+        "orange": '38;5;202m'
     }
 
     var styles = {
