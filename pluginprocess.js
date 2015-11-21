@@ -1,8 +1,12 @@
+var events = require("events");
+
 process.title = "squadbot-plugin"
 process.stdin.resume();
 process.stdin.setEncoding("utf8");
 process.stderr.setEncoding("utf8");
 process.stdout.setEncoding("utf8");
+
+global.bot = new events.EventEmitter();
 
 var puginName;
 var securityHash;
@@ -28,17 +32,18 @@ process.stdin.on("data", function(data) {
 
 		securityHash = data.hash
 		puginName = data.pluginName
+
+		require("./" + data.pluginLocation)
+
+		send(null, {
+			"function": "ready"
+		});
 	}
-
-	//process.stdout.write("SQUADBOT IPC " + "sd" + securityHash)
-
 });
 
-
-process.stdin.on('end', function(chunk) {
-    console.log(">" + "<");
-});
-
-(function wait () {
-   if (!false) setTimeout(wait, 1000);
-})();
+console.log = function(text) {
+	send(null, {
+		"function": "print",
+		"text": text
+	});
+}

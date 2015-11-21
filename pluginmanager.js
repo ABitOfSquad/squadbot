@@ -5,6 +5,7 @@ var childProcess = require("child_process");
 var pluginList;
 var pluginFolder;
 var reservedCommands;
+var loadingStatus = {};
 
 /**
  * Initializes the plugins folder, folder as given in the settings
@@ -49,10 +50,7 @@ function loadPlugins(){
                 }
             });
 
-            loopThroughPluginsfolder(function (){
-                print("All plugins loaded");
-                bot.emit("finishedLoading");
-            });
+            loopThroughPluginsfolder();
         }
     }
 }
@@ -129,6 +127,12 @@ function loopThroughPluginsfolder(callback){
                 continue;
             }
 
+            if (loadingStatus[meta.name]) {
+                print("There are multiple plugins called " + styledErrorName + ", please disable one of them", "red");
+                process.exit();
+            }
+
+            loadingStatus[meta.name] = 0
             startChild(pluginFolder + "/" + pluginList[i] + "/" + meta.script, meta.name)
 
         } catch (err) {
@@ -136,8 +140,6 @@ function loopThroughPluginsfolder(callback){
             console.log(err.stack);
         }
     }
-
-    // callback()
 }
 
 function startChild(file, name) {
@@ -158,25 +160,55 @@ function startChild(file, name) {
     child.stdout.on("data", function(data) {
         if (data.indexOf("GET SQUADBOT INIT") > -1) {
             child.stdin.write("SQUADBOT INIT" + "\n"
-                + '{"pluginName": "' + name + '", "hash": "' + hash + '"}');
+                + '{"pluginLocation": "' + file + '", "pluginName": "' + name + '", "hash": "' + hash + '"}');
 
             hadInit = true;
         }
         else if (data.indexOf("SQUADBOT IPC") > -1) {
             if (data.indexOf("SQUADBOT IPC " + hash) > -1) {
+                try {
+                    var json = JSON.parse(data.split("SQUADBOT IPC " + hash)[1])
+                } catch (err) {
+                    print("The plugin " + styledErrorName + " gave us an invalid message", "red");
+                    loadingStatus[name] = 2;
+                    return
+                }
+
+                try {
+                    switch (json.function) {
+                        // Plugin has been loaded
+                        case "ready":
+                            loadingStatus[name] = 1;
+                            checkIfDone();
+                            break;
+
+                        // Plugin called console.log, lets print that to the console
+                        case "print":
+                            print(style("gray", "bold") + name + style("reset") + ": " + json.text)
+                            break;
+
+                        default:
+                            print("Message from the plugin " + styledErrorName + " has an invalid function", "red");
+                            return
+                    }
+                } catch (err) {
+                    print("Could not process message from the plugin " + styledErrorName, "red");
+                    loadingStatus[name] = 2;
+                    return
+                }
 
             }
             else {
                 print("Security: The plugin " + styledErrorName + " tried to fake IPC communications and is being terminated", "red");
+                loadingStatus[name] = 2;
                 child.kill("SIGINT");
             }
         }
-        console.log(data);
-
     });
 
     child.stderr.on("data", function(data) {
         print("The plugin " + styledErrorName + " encountered the following error: \n\n" + style("reset") + data, "red");
+        loadingStatus[name] = 2;
     });
 
     child.on("close", function(code) {
@@ -186,6 +218,20 @@ function startChild(file, name) {
         else {
             print("The plugin " + styledErrorName + " has crashed", "red");
         }
+        loadingStatus[name] = 2;
     });
+}
 
+function checkIfDone() {
+    var done = true
+    for (var name in loadingStatus) {
+        if (loadingStatus[name] == 0) {
+            done = false
+        }
+    }
+
+    if (done) {
+        print("All plugins ready!", "green");
+        bot.emit("finishedLoading");
+    }
 }
