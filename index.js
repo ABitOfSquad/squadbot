@@ -23,6 +23,26 @@ terminalhandler.listen();
  */
 global.encodeEmoji = function(msg) {return emoji.parse(msg) };
 
+var colors =  {
+    "black": '30m', // Should probably not be used
+    "red": '31m',
+    "green": '32m',
+    "yellow": '33m',
+    "blue": '34m',
+    "purple": '35m',
+    "cyan": '36m',
+    "gray": '37m',
+    "white": '0m',
+    "orange": '38;5;202m'
+}
+
+var styles = {
+    "bold": "1;",
+    "lighter": "2;",
+    "italic": "3;",
+    "underline": "4;"
+}
+
 /**
  * Prints a fancier line to the console
  *
@@ -30,26 +50,6 @@ global.encodeEmoji = function(msg) {return emoji.parse(msg) };
  * @param color
  */
 global.print = function print(text, color, style) {
-    var colors =  {
-        "black": '30m', // Should probably not be used
-        "red": '31m',
-        "green": '32m',
-        "yellow": '33m',
-        "blue": '34m',
-        "purple": '35m',
-        "cyan": '36m',
-        "gray": '37m',
-        "white": '0m',
-        "orange": '38;5;202m'
-    }
-
-    var styles = {
-        "bold": "1;",
-        "lighter": "2;",
-        "italic": "3;",
-        "underline": "4;"
-    }
-
     var output = '\033[0m' // Clear all previous colors (just in case)
 
     if (color) {
@@ -75,22 +75,25 @@ global.print = function print(text, color, style) {
         output += '\033[0m'
     }
 
-    console.log(output);
+    process.stdout.write(output.split("\n").join("\n           ") + "\n");
 };
 
-// Uncomment for color demo
+global.style = function(color, style) {
+    if (color && color != "reset") {
+        if (colors[color]) {
+            var styleCode = "";
 
-// print("black", "black")
-// print("red", "red", "bold")
-// print("green", "green", "lighter")
-// print("brown", "brown", "italic")
-// print("blue", "blue", "underline")
-// print("purple", "purple")
-// print("cyan", "cyan")
-// print("gray", "gray")
-// print("normal")
-// process.exit();
+            if (styles[style]) {
+                styleCode = styles[style];
+            }
 
+            return '\033[' + styleCode + colors[color];
+        }
+    }
+    else {
+        return '\033[0m';
+    }
+}
 
 /**
  * SETTINGS (initializes settings.json)

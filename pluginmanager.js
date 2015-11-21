@@ -1,5 +1,6 @@
 var fs = require("fs");
 var path = require("path");
+var childProcess = require("child_process");
 
 var pluginList;
 var pluginFolder;
@@ -22,8 +23,6 @@ exports.init = function(folder){
     }
     catch (err) {
         pluginList = false;
-        console.log(err.stack);
-
         print("Could not load contents of plugin folder", "red");
         process.exit()
     }
@@ -62,22 +61,22 @@ function loopThroughPluginsfolder(callback){
     reservedCommands = {};
 
     for (var i = 0; i < pluginList.length; i++) {
-        var styledErrorName = "plugin \033[35m" + pluginList[i] + "\033[31m"
-        var styledWarningName = "plugin \033[33m" + pluginList[i] + "\033[38;5;202m"
-        console.log(pluginList[i]);
+        // We don't know the real name yet, so call the plugin by the name of its folder
+        var styledErrorName = style("purple") + pluginList[i] + style("red") ;
+        var styledWarningName = style("yellow") + pluginList[i] + style("orange");
 
         try {
             try {
                 var meta = fs.readFileSync(pluginFolder + "/" + pluginList[i] + "/plugin.json", "utf8");
             } catch (err) {
-                print("Missing plugin.json for " + styledErrorName + ", skipping", "red");
+                print("Missing plugin.json for plugin " + styledErrorName + ", skipping", "red");
                 continue;
             }
 
             try {
                 meta = JSON.parse(meta)
             } catch (err) {
-                print("The plugin.json for " + styledErrorName + " has syntax errors, skipping", "red");
+                print("The plugin.json for plugin " + styledErrorName + " has syntax errors, skipping", "red");
                 continue;
             }
 
@@ -86,7 +85,7 @@ function loopThroughPluginsfolder(callback){
 
             for (var t = 0; t < required.length; t++) {
                 if (typeof meta[required[t]] == "undefined") {
-                    print("The plugin.json for " + styledErrorName + " is missing the required value \"" + required[t] + "\", skipping", "red");
+                    print("The plugin.json for plugin " + styledErrorName + " is missing the required value \"" + required[t] + "\", skipping", "red");
                     found = true
                     break;
                 }
@@ -96,15 +95,20 @@ function loopThroughPluginsfolder(callback){
                 continue
             }
 
+            // We know the real name of the plugin from here on
+            styledErrorName = style("purple") + meta.name + style("red") ;
+            styledWarningName = style("yellow") + meta.name + style("orange");
+
             if (!meta.enabled) {
-                print("The " + styledErrorName + " has been disabled in its plugin.json, skipping", "red");
+                print("Plugin " + styledErrorName + " has been disabled in its plugin.json, skipping", "red");
                 continue;
             }
 
             if (meta.reservedCommands) {
                 for (var t = 0; t < meta.reservedCommands.length; t++) {
                     if (reservedCommands[meta.reservedCommands[t]]) {
-                        print("Both " + styledErrorName + " and \033[35m" + reservedCommands[meta.reservedCommands[t]] + "\033[31m depend on the same command, please disable one of them.", "red");
+                        print("Both the plugins " + styledErrorName + " and " + style("purple") + reservedCommands[meta.reservedCommands[t]] + style("red") +
+                            " depend on the same command, please disable one of them.", "red");
                         process.exit();
                     }
                     else {
@@ -115,58 +119,73 @@ function loopThroughPluginsfolder(callback){
 
             if (!meta.script) {
                 meta.script = "index.js"
-                print("Warning: The " + styledWarningName + " does not have a script path in its plugin.json, using default \"index.js\"", "orange");
+                print("Warning: The plugin " + styledWarningName + " does not have a script path in its plugin.json, using default \"index.js\"", "orange");
             }
 
             try {
                 fs.readFileSync(pluginFolder + "/" + pluginList[i] + "/" + meta.script, "utf8");
             } catch (err) {
-                print("Can't read the script \"" + meta.script + "\" for " + styledErrorName + ", skipping", "red");
+                print("Can't read the script \"" + meta.script + "\" for plugin " + styledErrorName + ", skipping", "red");
+                continue;
             }
 
+            startChild(pluginFolder + "/" + pluginList[i] + "/" + meta.script, meta.name)
+
         } catch (err) {
-            print("Could not load " + styledErrorName + ", the following error was thrown:", "red");
+            print("Could not load plugin " + styledErrorName + ", the following error was thrown:", "red");
             console.log(err.stack);
         }
-
-
-
-
-
-        // try {
-        //     var plugin = require("./" + pluginFolder + "/" + pluginList[i]).plugin;
-        //
-        //     //does the plugin has a exports.plugins?
-        //     if (!plugin) {
-        //         print("Warning: plugin " + pluginList[i] + " does not implement exports.plugin", "red")
-        //     } else {
-        //         //do some fancy commands checking
-        //         if (plugin.reservedCommands) {
-        //
-        //             for (var t = 0; t < plugin.reservedCommands.length; t++) {
-        //                 if (reservedCommands[plugin.reservedCommands[t]]) {
-        //                     print("Both " + pluginList[i] + " and " + reservedCommands[plugin.reservedCommands[t]] + " depend on the same command, please disable one of them.", "red");
-        //                     process.exit();
-        //                 }
-        //                 else {
-        //                     reservedCommands[plugin.reservedCommands[t]] = pluginList[i]
-        //                 }
-        //             }
-        //
-        //         }
-        //
-        //         if (!plugin["name"]) {
-        //             print("Loaded " + pluginList[i] + "!")
-        //         }
-        //         else {
-        //             print("Loaded " + plugin["name"] + " v" + plugin["version"] + "!")
-        //         }
-        //     }
-        // } catch (err) {
-        //     print("Plugin " + pluginList[i] + " crashed with the following error:", "red");
-        //     console.log(err.stack);
-        // }
     }
 
     // callback()
+}
+
+function startChild(file, name) {
+    var child = childProcess.spawn("node", ["./pluginprocess"]);
+    child.stdin.setEncoding("utf-8");
+    child.stderr.setEncoding("utf-8");
+    child.stdout.setEncoding("utf-8");
+
+    var styledErrorName = style("purple") + name + style("red")
+    var hadInit = false
+    var hash = "";
+    var hashChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i = 0; i < 12; i++) {
+        hash += hashChars.charAt(Math.floor(Math.random() * hashChars.length));
+    }
+
+    child.stdout.on("data", function(data) {
+        if (data.indexOf("GET SQUADBOT INIT") > -1) {
+            child.stdin.write("SQUADBOT INIT" + "\n"
+                + '{"pluginName": "' + name + '", "hash": "' + hash + '"}');
+
+            hadInit = true;
+        }
+        else if (data.indexOf("SQUADBOT IPC") > -1) {
+            if (data.indexOf("SQUADBOT IPC " + hash) > -1) {
+
+            }
+            else {
+                print("Security: The plugin " + styledErrorName + " tried to fake IPC communications and is being terminated", "red");
+                child.kill("SIGINT");
+            }
+        }
+        console.log(data);
+
+    });
+
+    child.stderr.on("data", function(data) {
+        print("The plugin " + styledErrorName + " encountered the following error: \n\n" + style("reset") + data, "red");
+    });
+
+    child.on("close", function(code) {
+        if (code == 0) {
+            print("The plugin " + styledErrorName + " has decided to stop", "red");
+        }
+        else {
+            print("The plugin " + styledErrorName + " has crashed", "red");
+        }
+    });
+
 }
